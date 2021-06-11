@@ -1,5 +1,12 @@
 <template>
   <v-app>
+     <v-card  class="mx-auto"
+    width="1200">
+   <v-text-field
+              color="purple darken-4"
+              loading
+              disabled
+            ></v-text-field>
     <template>
       <v-data-table
         :headers="headers"
@@ -50,12 +57,20 @@
                           label="precio"
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="6" sm="6" md="6">
-                        <v-text-field
-                          v-model="editedItem.categoria"
-                          label="Categoria"
-                        ></v-text-field>
-                      </v-col>
+                       <v-col cols="6" sm="6" md="6">
+                          <select
+                            v-model="editedItem.categoria"
+                            class="select-css"
+                          >
+                            <option
+                              v-for="(item, index) in items2"
+                              :key="index"
+                              v-bind:value="item.nombre"
+                            >
+                              {{ item.nombre }}
+                            </option>
+                          </select>
+                        </v-col>
                       <v-col cols="6" sm="6" md="6">
                         <v-text-field
                           v-model="editedItem.nombre"
@@ -96,11 +111,13 @@
         </template>
       </v-data-table>
     </template>
+       </v-card>
   </v-app>
 </template>
 <script>
 export default {
   data: () => ({
+     items2: [],
     dialog: false,
     search: "",
     idd: "",
@@ -150,15 +167,35 @@ export default {
   },
 
   created() {
+   this.autocompleta();
     this.initialize();
   },
 
   methods: {
+      autocompleta() {
+      var cont = 0;
+      async function asyncData() {
+        const response = await fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/catalogo.php"
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        this.items2 = data;
+
+        console.log(this.items2);
+      });
+    },
     cargar_datos() {
       var cont = 0;
       async function asyncData() {
         const response = await fetch(
-          "http://localhost:81/sist_ventas/src/backend/articulos.php"
+          "http://jorgeperalta-001-site6.itempurl.com/articulos.php"
         );
         const data = await response.json();
 
@@ -216,20 +253,16 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        var formdata = new FormData();
-        formdata.append("id", this.idd);
-        formdata.append("categoria", this.categoriaa);
-        formdata.append("nombre", this.nombree);
-        formdata.append("precio", this.precioo);
+    
 
         var requestOptions = {
           method: "PUT",
-          body: formdata,
+        
           redirect: "follow",
         };
 
         fetch(
-          "http://localhost:81/sist_ventas/src/backend/articulos.php?id=" +
+          "http://jorgeperalta-001-site6.itempurl.com/articulos.php?id=" +
             this.editedItem.id +
             "&categoria=" +
             this.editedItem.categoria +
@@ -258,7 +291,7 @@ export default {
         };
 
         fetch(
-          "http://localhost:81/sist_ventas/src/backend/articulos.php",
+          "http://jorgeperalta-001-site6.itempurl.com/articulos.php",
           requestOptions
         )
           .then((response) => response.text())
@@ -286,7 +319,7 @@ export default {
       };
 
       fetch(
-        "http://localhost:81/sist_ventas/src/backend/articulos.php?id=" +
+        "http://jorgeperalta-001-site6.itempurl.com/articulos.php?id=" +
           item.id,
         requestOptions
       )
@@ -299,3 +332,30 @@ export default {
   },
 };
 </script>
+<style scoped>
+.select-css {
+  display: block;
+  font-size: 16px;
+  font-family: "Verdana", sans-serif;
+  font-weight: 400;
+  color: rgb(234, 235, 225);
+  line-height: 1.3;
+  padding: 0.4em 1.4em 0.3em 0.8em;
+  width: 400px;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 20px auto;
+  border: 1px solid #aaa;
+  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.03);
+  border-radius: 0.3em;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: rgb(17, 17, 17);
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"),
+    linear-gradient(to bottom, #0f0f0f 0%, #0c0c0c 100%);
+  background-repeat: no-repeat, repeat;
+  background-position: right 0.7em top 50%, 0 0;
+  background-size: 0.65em auto, 100%;
+}
+</style>

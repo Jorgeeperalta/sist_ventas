@@ -40,9 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $input = $_POST;
   $sql = "INSERT INTO articulos
-          (id,categoria,nombre,precio)
+          (id,categoria,nombre,precio,url,url2,url3)
           VALUES
-          (:id, :categoria, :nombre, :precio)";
+          (:id, :categoria, :nombre, :precio,:url,:url2,:url3)";
 
 
   $statement = $dbConn->prepare($sql);

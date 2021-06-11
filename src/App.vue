@@ -24,9 +24,9 @@
       </div>
     </v-app-bar>
 
-    <v-sheet height="1000" class="overflow-hidden" style="position: relative;">
+    <v-sheet height="8000" class="overflow-hidden" style="position: relative;">
       <v-content>
-        <v-row class="text-center">
+        <v-row class="text-center" v-if="variable == 2">
           <v-col cols="12">
             <v-img
               :src="require('./assets/logo.svg')"
@@ -41,7 +41,7 @@
         <di v-if="variable == 0 || 1">
           <ventas v-if="vent == true"></ventas>
           <articulos v-if="art == true && variable == 1"></articulos>
-       
+          <catalogo v-if="cate == true && variable == 1"></catalogo>
         </di>
       </v-content>
 
@@ -60,6 +60,9 @@
         <v-btn block @click="elije_articulos()"
           >Articulos<v-icon></v-icon
         ></v-btn>
+        <v-btn block @click="elije_categorias()"
+          >Categorias<v-icon></v-icon
+        ></v-btn>
         <v-btn block @click="elije_ventas()">Ventas<v-icon></v-icon></v-btn>
       </v-navigation-drawer>
     </v-sheet>
@@ -71,6 +74,7 @@ import login from "@/components/Login.vue";
 import articulos from "@/components/Articulo.vue";
 import ventas from "@/components/Venta.vue";
 import prueba from "@/components/prueba.vue";
+import catalogo from "@/components/Catalogo.vue";
 export default {
   name: "App",
 
@@ -79,11 +83,13 @@ export default {
     articulos,
     ventas,
     prueba,
+    catalogo,
   },
 
   data: () => ({
     art: false,
     vent: false,
+    cate: false,
     variable: 2,
     estado: false,
 
@@ -97,10 +103,17 @@ export default {
     elije_articulos() {
       this.art = true;
       this.vent = false;
+      this.cate = false;
     },
     elije_ventas() {
       this.vent = true;
       this.art = false;
+      this.cate = false;
+    },
+    elije_categorias() {
+      this.vent = false;
+      this.art = false;
+      this.cate = true;
     },
   },
 };
