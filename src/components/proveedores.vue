@@ -10,7 +10,7 @@
     >
       <template v-slot:top>
         <v-toolbar flat color="black">
-          <v-toolbar-title>Categorias</v-toolbar-title>
+          <v-toolbar-title>Proveedores</v-toolbar-title>
 
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
@@ -35,26 +35,32 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12" sm="6" md="6">
                       <v-text-field
                         v-model="editedItem.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12" sm="6" md="6">
                       <v-text-field
-                        v-model="editedItem.descripcion"
-                        label="Descripcion"
+                        v-model="editedItem.telefono"
+                        label="Telefono"
                       ></v-text-field>
                     </v-col>
                   </v-row>
-                  <v-row>
-                      <v-select
-                    :items="selectproveedores"
-                 
-              
-                    v-model="editedItem.proveedores"
-                  ></v-select>
+                      <v-row>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        v-model="editedItem.email"
+                        label="Email"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        v-model="editedItem.cuil"
+                        label="Cuil"
+                      ></v-text-field>
+                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -71,20 +77,14 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">
-           mdi-pencil
-        </v-icon>
-        <v-icon small @click="deleteItem(item)">
-          mdi-delete
-        </v-icon>
+        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
+        <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">Reset</v-btn>
       </template>
     </v-data-table>
-   
   </v-card>
- 
 </template>
 
 <script>
@@ -92,7 +92,6 @@ export default {
   data: () => ({
     idd: "",
     nombree: "",
-    proveedores:[],
     descripcionn: "",
     dialog: false,
     search: "",
@@ -105,24 +104,27 @@ export default {
       },
 
       { text: "Nombre", value: "nombre" },
-      { text: "Descripcion", value: "descripcion" },
-        { text: "Proveedores", value: "proveedores" },
+      { text: "Telefono", value: "telefono" },
+      { text: "Email", value: "email" },
+      { text: "Cuit", value: "cuil" },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    selectproveedores: [],
     desserts: [],
     editedIndex: -1,
     editedItem: {
       id: "",
       nombre: "",
-      descripcion: "",
-      proveedores: "",
+      telefono: "",
+      email: "",
+      cuil: "",
+
     },
     defaultItem: {
       id: "",
       nombre: "",
-      descripcion: "",
-      proveedores: "",
+      telefono: "",
+      email: "",
+      cuil: "",
     },
   }),
 
@@ -140,54 +142,9 @@ export default {
 
   created() {
     this.initialize();
-    this.initializeproveedores();
-  
   },
 
   methods: {
-    muestraproveedores() {
-      this.proveedores.forEach((element) => {
-          this.selectproveedores.push(element.nombre)
-      })
-      
-      console.log(this.selectproveedores[1])},
-    // initializeproveedores() {
-    //   var requestOptions = {
-    //     method: "GET",
-
-    //     redirect: "follow",
-    //   };
-    //   //
-    //   fetch(
-    //     "http://jorgeperalta-001-site6.itempurl.com/proveedores.php",
-    //     requestOptions
-    //   )
-    //     .then((response) => response.json())
-    //     .then((result) => (this.proveedores = result))
-    //     .catch((error) => console.log("error", error));
-
-    // },
-    initializeproveedores() {
-      var cont = 0;
-      async function asyncData() {
-        const response = await fetch(
-          "http://jorgeperalta-001-site6.itempurl.com/proveedores.php"
-        );
-        const data = await response.json();
-
-        return data;
-      }
-
-      const result = asyncData();
-
-      result.then((data) => {
-        data.forEach((element) => {
-          this.proveedores[cont] = element;
-          cont++;
-        });
-          this.muestraproveedores();
-      });
-    },
     initialize() {
       var requestOptions = {
         method: "GET",
@@ -196,7 +153,7 @@ export default {
       };
       //
       fetch(
-        "http://jorgeperalta-001-site6.itempurl.com/catalogo.php",
+        "http://jorgeperalta-001-site6.itempurl.com/proveedores.php",
         requestOptions
       )
         .then((response) => response.json())
@@ -223,7 +180,7 @@ export default {
       };
 
       fetch(
-        "http://jorgeperalta-001-site6.itempurl.com/catalogo.php?id=" + item.id,
+        "http://jorgeperalta-001-site6.itempurl.com/proveedores.php?id=" + item.id,
         requestOptions
       )
         .then((response) => response.text())
@@ -241,24 +198,23 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-      
-
         var requestOptions = {
           method: "PUT",
-         
+
           redirect: "follow",
         };
 
         fetch(
-          "http://jorgeperalta-001-site6.itempurl.com/catalogo.php?id=" +
+          "http://jorgeperalta-001-site6.itempurl.com/proveedores.php?id=" +
             this.editedItem.id +
             "&nombre=" +
             this.editedItem.nombre +
-            "&descripcion=" +
-            this.editedItem.descripcion +
-            "&proveedores=" +
-            this.editedItem.proveedores,
-         
+            "&telefono=" +
+            this.editedItem.telefono +
+            "&email=" +
+            this.editedItem.email +
+            "&cuil=" +
+            this.editedItem.cuil,
           requestOptions
         )
           .then((response) => response.text())
@@ -270,8 +226,9 @@ export default {
 
         formdata.append("id", this.editedItem.id);
         formdata.append("nombre", this.editedItem.nombre);
-        formdata.append("descripcion", this.editedItem.descripcion);
-         formdata.append("proveedores", this.editedItem.proveedores);
+        formdata.append("telefono", this.editedItem.telefono);
+        formdata.append("email", this.editedItem.email);
+        formdata.append("cuil", this.editedItem.cuil);
 
         var requestOptions = {
           method: "POST",
@@ -280,7 +237,7 @@ export default {
         };
 
         fetch(
-          "http://jorgeperalta-001-site6.itempurl.com/catalogo.php",
+          "http://jorgeperalta-001-site6.itempurl.com/proveedores.php",
           requestOptions
         )
           .then((response) => response.text())

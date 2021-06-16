@@ -1,63 +1,87 @@
 <template>
   <v-app>
-     <v-card  class="mx-auto"
-    width="1200">
-   <v-text-field
-              color="purple darken-4"
-              loading
-              disabled
-            ></v-text-field>
-    <template>
-      <v-data-table
-        :headers="headers"
-        :items="desserts"
-        sort-by="precio"
-        class="elevation-1"
-        :search="search"
-        :custom-filter="filterOnlyCapsText"
-      >
-        <template v-slot:top>
-          <v-toolbar flat color="black">
-            <v-toolbar-title>Articulos</v-toolbar-title>
-
-            <v-divider class="mx-4" inset vertical></v-divider>
-            <v-spacer></v-spacer>
+    <v-card class="mx-auto" width="1200">
+      <v-text-field color="purple darken-4" loading disabled></v-text-field>
+      <template>
+        <v-row>
+          <v-col md="4" sm="4">
+            <div style="margin-left:30px"> <label ><b >Seleccione una Categoria Filtrar: </b></label>
+            <br>
+            <select v-model="editedItem.categoria" class="select-css">
+              <option
+                v-for="(item, index) in items2"
+                :key="index"
+                v-bind:value="item.nombre"
+              >
+                {{ item.nombre }}
+              </option>
+            </select></div>
+           
+          </v-col>
+          <v-col md="4" sm="4">
+             <div > <label ><b >Porcentaje a actualizar: </b></label></div>
+         
             <v-text-field
-              v-model="search"
-              label="Buscar (SOLO UN NUMERO)"
-              class="mx-2"
+              v-model="porcentaje"
+              label="Porcentaje"
             ></v-text-field>
+          </v-col>
+          <v-col md="4" sm="4">
+            
+           <v-btn  @click="actualizaporcategoria(porcentaje,editedItem.categoria)" style="margin-top:20px">Actualizar</v-btn>
+          </v-col>
+        </v-row>
 
-            <v-spacer></v-spacer>
+        <v-data-table
+          :headers="headers"
+          :items="desserts"
+          sort-by="precio"
+          class="elevation-1"
+          :search="search"
+          :custom-filter="filterOnlyCapsText"
+        >
+          <template v-slot:top>
+            <v-toolbar flat color="black">
+              <v-toolbar-title>Articulos</v-toolbar-title>
 
-            <v-dialog v-model="dialog" max-width="500px">
-              <template v-slot:activator="{ on }">
-                <v-btn color="primary" dark class="mb-2" v-on="on"
-                  >Nuevo Articulo</v-btn
-                >
-              </template>
+              <v-divider class="mx-4" inset vertical></v-divider>
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="search"
+                label="Buscar (SOLO UN NUMERO)"
+                class="mx-2"
+              ></v-text-field>
 
-              <v-card>
-                <v-card-title>
-                  <span class="headline">{{ formTitle }}</span>
-                </v-card-title>
+              <v-spacer></v-spacer>
 
-                <v-card-text>
-                  <v-container>
-                    <v-row>
-                      <v-col cols="6" sm="6" md="6">
-                        <v-text-field
-                          v-model="editedItem.id"
-                          label="Id"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="6" sm="6" md="6">
-                        <v-text-field
-                          v-model="editedItem.precio"
-                          label="precio"
-                        ></v-text-field>
-                      </v-col>
-                       <v-col cols="6" sm="6" md="6">
+              <v-dialog v-model="dialog" max-width="500px">
+                <template v-slot:activator="{ on }">
+                  <v-btn color="primary" dark class="mb-2" v-on="on"
+                    >Nuevo Articulo</v-btn
+                  >
+                </template>
+
+                <v-card>
+                  <v-card-title>
+                    <span class="headline">{{ formTitle }}</span>
+                  </v-card-title>
+
+                  <v-card-text>
+                    <v-container>
+                      <v-row>
+                        <v-col cols="6" sm="6" md="6">
+                          <v-text-field
+                            v-model="editedItem.id"
+                            label="Id"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="6" sm="6" md="6">
+                          <v-text-field
+                            v-model="editedItem.precio"
+                            label="precio"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="6" sm="6" md="6">
                           <select
                             v-model="editedItem.categoria"
                             class="select-css"
@@ -71,53 +95,61 @@
                             </option>
                           </select>
                         </v-col>
-                      <v-col cols="6" sm="6" md="6">
-                        <v-text-field
-                          v-model="editedItem.nombre"
-                          label="Nombre"
-                        ></v-text-field>
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                </v-card-text>
+                        <v-col cols="6" sm="6" md="6">
+                          <v-text-field
+                            v-model="editedItem.nombre"
+                            label="Nombre"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col sm="12" md="12">
+                          <v-text-field
+                            v-model="editedItem.cantidad"
+                            label="Cantidad"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                  </v-card-text>
 
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="close"
-                    >Cancelar</v-btn
-                  >
-                  <v-btn color="blue darken-1" text @click="save"
-                    >Guardar</v-btn
-                  >
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </v-toolbar>
-        </template>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="close"
+                      >Cancelar</v-btn
+                    >
+                    <v-btn color="blue darken-1" text @click="save"
+                      >Guardar</v-btn
+                    >
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+            </v-toolbar>
+          </template>
 
-        <template v-slot:item.precio="{ item }">
-          <v-chip :color="getColor(item.precio)" dark>{{ item.precio }}</v-chip>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item)">
-            mdi-pencil
-          </v-icon>
-          <v-icon small @click="deleteItem(item)">
-            mdi-delete
-          </v-icon>
-        </template>
-        <template v-slot:no-data>
-          <v-btn color="primary" @click="initialize">Reset</v-btn>
-        </template>
-      </v-data-table>
-    </template>
-       </v-card>
+          <template v-slot:[`item.precio`]="{ item }">
+            <v-chip :color="getColor(item.precio)" dark>{{
+              item.precio
+            }}</v-chip>
+          </template>
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-icon small class="mr-2" @click="editItem(item)">
+              mdi-pencil
+            </v-icon>
+            <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+          </template>
+          <template v-slot:no-data>
+            <v-btn color="primary" @click="initialize">Reset</v-btn>
+          </template>
+        </v-data-table>
+      </template>
+    </v-card>
   </v-app>
 </template>
 <script>
 export default {
   data: () => ({
-     items2: [],
+    items2: [],
     dialog: false,
     search: "",
     idd: "",
@@ -136,21 +168,31 @@ export default {
       { text: "Nombre", value: "nombre" },
 
       { text: "Percio", value: "precio" },
+      { text: "Cantidad", value: "cantidad" },
       { text: "Actions", value: "actions", sortable: false },
     ],
     desserts: [],
     editedIndex: -1,
     editedItem: {
       id: "",
-      precio: 0,
-      categoria: 0,
-      nombre: 0,
+      precio: "",
+      categoria: "",
+      nombre: "",
+      url: "",
+      url2: "",
+      url3: "",
+      cantidad: "",
     },
+    porcentaje:null,
     defaultItem: {
       id: "",
-      precio: 0,
-      categoria: 0,
-      nombre: 0,
+      precio: "",
+      categoria: "",
+      nombre: "",
+      url: "",
+      url2: "",
+      url3: "",
+      cantidad: "",
     },
   }),
 
@@ -167,12 +209,17 @@ export default {
   },
 
   created() {
-   this.autocompleta();
+    this.autocompleta();
     this.initialize();
   },
 
   methods: {
-      autocompleta() {
+
+    actualizaporcategoria(porc,categoria){
+      porc= porc/ 100
+      alert(porc + categoria)
+    },
+    autocompleta() {
       var cont = 0;
       async function asyncData() {
         const response = await fetch(
@@ -215,10 +262,7 @@ export default {
         value != null &&
         search != null &&
         typeof value === "string" &&
-        value
-          .toString()
-          .toLocaleUpperCase()
-          .indexOf(search) !== -1
+        value.toString().toLocaleUpperCase().indexOf(search) !== -1
       );
     },
     getColor(precio) {
@@ -253,11 +297,8 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-    
-
         var requestOptions = {
           method: "PUT",
-        
           redirect: "follow",
         };
 
@@ -269,7 +310,15 @@ export default {
             "&nombre=" +
             this.editedItem.nombre +
             "&precio=" +
-            this.editedItem.precio,
+            this.editedItem.precio +
+            "&url=" +
+            this.editedItem.url +
+            "&url2=" +
+            this.editedItem.url2 +
+            "&url3=" +
+            this.editedItem.url3 +
+            "&cantidad=" +
+            this.editedItem.cantidad,
           requestOptions
         )
           .then((response) => response.text())
@@ -283,7 +332,10 @@ export default {
         formdata.append("categoria", this.editedItem.categoria);
         formdata.append("nombre", this.editedItem.nombre);
         formdata.append("precio", this.editedItem.precio);
-
+        formdata.append("url", this.editedItem.url);
+        formdata.append("url2", this.editedItem.url2);
+        formdata.append("url3", this.editedItem.url3);
+        formdata.append("cantidad", this.editedItem.cantidad);
         var requestOptions = {
           method: "POST",
           body: formdata,
@@ -302,8 +354,6 @@ export default {
         this.close();
       }
       this.close();
-
-      alert(this.editedItem.precio);
     },
     deleteItem(item) {
       const index = this.desserts.indexOf(item);

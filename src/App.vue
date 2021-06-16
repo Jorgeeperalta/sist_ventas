@@ -42,6 +42,7 @@
           <ventas v-if="vent == true"></ventas>
           <articulos v-if="art == true && variable == 1"></articulos>
           <catalogo v-if="cate == true && variable == 1"></catalogo>
+          <proveedores v-if="provee == true && variable == 1"></proveedores>
         </di>
       </v-content>
 
@@ -63,6 +64,9 @@
         <v-btn block @click="elije_categorias()"
           >Categorias<v-icon></v-icon
         ></v-btn>
+         <v-btn block @click="elije_proveedores()"
+          >Proveedores<v-icon></v-icon
+        ></v-btn>
         <v-btn block @click="elije_ventas()">Ventas<v-icon></v-icon></v-btn>
       </v-navigation-drawer>
     </v-sheet>
@@ -75,6 +79,7 @@ import articulos from "@/components/Articulo.vue";
 import ventas from "@/components/Venta.vue";
 import prueba from "@/components/prueba.vue";
 import catalogo from "@/components/Catalogo.vue";
+import proveedores from "@/components/proveedores.vue";
 export default {
   name: "App",
 
@@ -84,9 +89,11 @@ export default {
     ventas,
     prueba,
     catalogo,
+    proveedores
   },
 
   data: () => ({
+    provee:false,
     art: false,
     vent: false,
     cate: false,
@@ -100,20 +107,29 @@ export default {
     ],
   }),
   methods: {
+    elije_proveedores(){
+        this.art = false;
+      this.vent = false;
+      this.cate = false;
+      this.provee= true
+    },
     elije_articulos() {
       this.art = true;
       this.vent = false;
       this.cate = false;
+      this.provee= false
     },
     elije_ventas() {
       this.vent = true;
       this.art = false;
       this.cate = false;
+       this.provee= false
     },
     elije_categorias() {
       this.vent = false;
       this.art = false;
       this.cate = true;
+       this.provee= false
     },
   },
 };
