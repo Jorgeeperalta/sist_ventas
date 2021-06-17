@@ -5,30 +5,44 @@
       <template>
         <v-row>
           <v-col md="4" sm="4">
-            <div style="margin-left:30px"> <label ><b >Seleccione una Categoria Filtrar: </b></label>
-            <br>
-            <select v-model="editedItem.categoria" class="select-css">
-              <option
-                v-for="(item, index) in items2"
-                :key="index"
-                v-bind:value="item.nombre"
+            <div style="margin-left: 30px">
+              <label><b>Seleccione una Categoria Filtrar: </b></label>
+              <br />
+              <select
+                @click="cargar_datos()"
+                v-model="editedItem.categoria"
+                class="select-css"
               >
-                {{ item.nombre }}
-              </option>
-            </select></div>
-           
+                <option
+                  v-for="(item, index) in items2"
+                  :key="index"
+                  v-bind:value="item.nombre"
+                >
+                  {{ item.nombre }}
+                </option>
+              </select>
+            </div>
           </v-col>
           <v-col md="4" sm="4">
-             <div > <label ><b >Porcentaje a actualizar: </b></label></div>
-         
+            <div>
+              <label><b>Porcentaje a actualizar: </b></label>
+            </div>
+
             <v-text-field
+              @click="agrupaarticulos(editedItem.categoria)"
               v-model="porcentaje"
               label="Porcentaje"
             ></v-text-field>
           </v-col>
           <v-col md="4" sm="4">
-            
-           <v-btn  @click="actualizaporcategoria(porcentaje,editedItem.categoria)" style="margin-top:20px">Actualizar</v-btn>
+            <v-btn
+              outlined
+              color="yellow"
+              block
+              @click="actualizaporcategoria(porcentaje, editedItem.categoria)"
+              style="margin-top: 35px; margin-right: 10px"
+              >Actualizar</v-btn
+            >
           </v-col>
         </v-row>
 
@@ -48,7 +62,7 @@
               <v-spacer></v-spacer>
               <v-text-field
                 v-model="search"
-                label="Buscar (SOLO UN NUMERO)"
+                label="Buscar (SOLO UN PRODUCTO X IDENTIFICADOR)"
                 class="mx-2"
               ></v-text-field>
 
@@ -183,7 +197,7 @@ export default {
       url3: "",
       cantidad: "",
     },
-    porcentaje:null,
+    porcentaje: null,
     defaultItem: {
       id: "",
       precio: "",
@@ -214,10 +228,37 @@ export default {
   },
 
   methods: {
+    agrupaarticulos(categoria) {
+      var art = new Array();
+      this.desserts.forEach((element) => {
+        if (element.categoria == categoria) art.push(element);
+      });
+      this.desserts = art;
+    },
 
-    actualizaporcategoria(porc,categoria){
-      porc= porc/ 100
-      alert(porc + categoria)
+    actualizaporcategoria(porc, categoria) {
+      porc = ( porc / 100) +1;
+      // alert(porc + categoria)
+
+      var formdata = new FormData();
+
+      var requestOptions = {
+        method: "PUT",
+        body: formdata,
+        redirect: "follow",
+      };
+
+      fetch(
+        "http://jorgeperalta-001-site6.itempurl.com/actualizaarticulos.php?categoria="+ categoria + "&valor="+porc+"",
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.log("error", error));
+
+    
+
+      this.cargar_datos();
     },
     autocompleta() {
       var cont = 0;
@@ -253,7 +294,7 @@ export default {
 
       result.then((data) => {
         this.desserts = data;
-        console.log(data);
+        // console.log(data);
       });
     },
 
