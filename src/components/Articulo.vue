@@ -67,6 +67,25 @@
               ></v-text-field>
 
               <v-spacer></v-spacer>
+              <v-dialog max-width="500px" v-model="dialogstock">
+                <v-card>
+                  <v-card-title>
+                    <label>Actualiza Stock de {{ unidadstock.nombre }}</label>
+                  </v-card-title>
+                  <v-card-text
+                    ><v-text-field
+                      v-model="stock"
+                      label="Ingrese Cantidad"
+                    ></v-text-field>
+                    <br />
+                    <v-btn
+                      style="margin-left: 340px"
+                      @click="unidadstockmetodo(stock)"
+                      >Actualiza</v-btn
+                    >
+                  </v-card-text>
+                </v-card>
+              </v-dialog>
 
               <v-dialog v-model="dialog" max-width="500px">
                 <template v-slot:activator="{ on }">
@@ -147,6 +166,13 @@
             }}</v-chip>
           </template>
           <template v-slot:[`item.actions`]="{ item }">
+            <v-icon
+              style="margin-right: 10px"
+              small
+              @click="actualizastock(item), (dialogstock = true)"
+            >
+              mdi-table-column-plus-before
+            </v-icon>
             <v-icon small class="mr-2" @click="editItem(item)">
               mdi-pencil
             </v-icon>
@@ -163,6 +189,7 @@
 <script>
 export default {
   data: () => ({
+    stock: null,
     items2: [],
     dialog: false,
     search: "",
@@ -183,10 +210,13 @@ export default {
 
       { text: "Percio", value: "precio" },
       { text: "Cantidad", value: "cantidad" },
+      { text: "Fecha", value: "fecha"},
       { text: "Actions", value: "actions", sortable: false },
     ],
+    dialogstock: false,
     desserts: [],
     editedIndex: -1,
+    unidadstock: [],
     editedItem: {
       id: "",
       precio: "",
@@ -237,7 +267,7 @@ export default {
     },
 
     actualizaporcategoria(porc, categoria) {
-      porc = ( porc / 100) +1;
+      porc = porc / 100 + 1;
       // alert(porc + categoria)
 
       var formdata = new FormData();
@@ -249,14 +279,18 @@ export default {
       };
 
       fetch(
-        "http://jorgeperalta-001-site6.itempurl.com/actualizaarticulos.php?categoria="+ categoria + "&valor="+porc+"",
+        "http://jorgeperalta-001-site6.itempurl.com/actualizaarticulos.php?categoria=" +
+          categoria +
+          "&valor=" +
+          porc  +
+          "&fecha=" +
+          new Date().toISOString().substr(0, 10) +
+          "",
         requestOptions
       )
         .then((response) => response.text())
         .then((result) => console.log(result))
         .catch((error) => console.log("error", error));
-
-    
 
       this.cargar_datos();
     },
@@ -335,7 +369,35 @@ export default {
         this.editedIndex = -1;
       }, 300);
     },
+    unidadstockmetodo(st) {
+      var formdata = new FormData();
 
+      var requestOptions = {
+        method: "PUT",
+        body: formdata,
+        redirect: "follow",
+      };
+
+      fetch(
+        "http://jorgeperalta-001-site6.itempurl.com/actualizastock.php?id=" +
+          this.unidadstock.id +
+          "&stock=" +
+           st +
+          "&fecha=" +
+           new Date().toISOString().substr(0, 10)+
+          "",
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.log("error", error));
+
+      this.cargar_datos();
+    },
+    actualizastock(item) {
+      this.unidadstock = item;
+      this.dialogstock = true;
+    },
     save() {
       if (this.editedIndex > -1) {
         var requestOptions = {
@@ -359,7 +421,9 @@ export default {
             "&url3=" +
             this.editedItem.url3 +
             "&cantidad=" +
-            this.editedItem.cantidad,
+            this.editedItem.cantidad+
+            "&fecha=" +
+             new Date().toISOString().substr(0, 10),
           requestOptions
         )
           .then((response) => response.text())
@@ -377,6 +441,7 @@ export default {
         formdata.append("url2", this.editedItem.url2);
         formdata.append("url3", this.editedItem.url3);
         formdata.append("cantidad", this.editedItem.cantidad);
+         formdata.append("fecha", new Date().toISOString().substr(0, 10));
         var requestOptions = {
           method: "POST",
           body: formdata,
