@@ -43,7 +43,7 @@
                         label="Apellido"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="4" md="4">
+                    <v-col cols="12" sm="4" md="4"  v-if="nomb==true">
                       <v-text-field
                         v-model="editedItem.nombre"
                         label="Nombre"
@@ -107,6 +107,7 @@
 <script>
 export default {
   data: () => ({
+    nomb:false,
     coordenadaslatlong: [
       { loc: "SAN CLEMENTE DEL TUYú", lat: -36.3560141, lng: -56.7189854 },
       { loc: "LAS TONINAS", lat: -36.4882488, lng: -56.7050737 },
@@ -134,8 +135,8 @@ export default {
         sortable: false,
         value: "id",
       },
-      { text: "Apellido", value: "apellido" },
-      { text: "Nombre", value: "nombre" },
+      { text: "Apellido y Nombre", value: "apellido" },
+      
       { text: "Telefono", value: "telefono" },
       { text: "Localidad", value: "localidad" },
       { text: "Domicilio", value: "domicilio" },
