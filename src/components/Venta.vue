@@ -201,7 +201,7 @@
                         dark
                         large
                         color="green darken-3"
-                        @click="print(), limpiar()"
+                        @click="  guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
@@ -211,21 +211,23 @@
                         dark
                         large
                         color="amber accent-3"
-                        @click="print(), limpiar()"
+                        @click=" guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
-                    </v-col>
-                  </v-row>
-
-                  <v-btn
+                         <v-btn
                     class="mx-2"
                     fab
                     dark
                     large
                     color="deep-orange darken-4"
-                    @click="print(), limpiar()"
+                    @click="print()"
                     ><v-icon>mdi-shredder</v-icon></v-btn
                   >
+                    </v-col>
+                  
+                  </v-row>
+
+                 
                 </v-card>
               </v-card>
             </v-hover>
@@ -273,7 +275,7 @@
                     <v-label>Vuelto </v-label>
                     <h1>$ {{ fin }}</h1>
                   </div>
-                  <v-row>
+               <v-row>
                     <v-col>
                       <v-btn
                         class="mx-2"
@@ -281,7 +283,7 @@
                         dark
                         large
                         color="green darken-3"
-                        @click="print(), limpiar()"
+                        @click="  guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
@@ -291,20 +293,22 @@
                         dark
                         large
                         color="amber accent-3"
-                        @click="print(), limpiar()"
+                        @click=" guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
-                    </v-col>
-                  </v-row>
-                  <v-btn
+                         <v-btn
                     class="mx-2"
                     fab
                     dark
                     large
                     color="deep-orange darken-4"
-                    @click="print(), limpiar()"
+                    @click="print()"
                     ><v-icon>mdi-shredder</v-icon></v-btn
                   >
+                    </v-col>
+                  
+                  </v-row>
+                 
                 </v-card>
               </v-card>
             </v-hover>
@@ -365,7 +369,7 @@
                         dark
                         large
                         color="green darken-3"
-                        @click="print(), limpiar()"
+                        @click=" guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
@@ -375,21 +379,23 @@
                         dark
                         large
                         color="amber accent-3"
-                        @click="print(), limpiar()"
+                        @click=" guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
-                    </v-col>
-                  </v-row>
-
-                  <v-btn
+                         <v-btn
                     class="mx-2"
                     fab
                     dark
                     large
                     color="deep-orange darken-4"
-                    @click="print(), limpiar()"
+                    @click="print(),limpiar()"
                     ><v-icon>mdi-shredder</v-icon></v-btn
                   >
+                    </v-col>
+                  
+                  </v-row>
+
+                
                 </v-card>
               </v-card>
             </v-hover>
@@ -495,6 +501,30 @@ export default {
   },
 
   methods: {
+     guardarventa(){
+           var formdata = new FormData();
+
+        formdata.append("id", "");
+        formdata.append("fkcliente", this.customer.id);
+        formdata.append("fecha", new Date().toISOString().substr(0, 10));
+        formdata.append("monto", this.monto);
+        formdata.append("tipopago", this.tipopago);
+      
+
+        var requestOptions = {
+          method: "POST",
+          body: formdata,
+          redirect: "follow",
+        };
+
+        fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => console.log(result));
+          confirm("Venta Almacenada con exito!!")
+     },
       focusInput() {
       this.$refs.cantidad.focus();
     },

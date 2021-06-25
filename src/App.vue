@@ -43,7 +43,8 @@
           <articulos v-if="art == true && variable == 1"></articulos>
           <catalogo v-if="cate == true && variable == 1"></catalogo>
           <proveedores v-if="provee == true && variable == 1"></proveedores>
-           <clientes v-if="clie == true && variable == 1"></clientes>
+          <clientes v-if="clie == true && variable == 1"></clientes>
+          <informe v-if="info == true && variable == 1"></informe>
         </di>
       </v-content>
 
@@ -68,9 +69,9 @@
         <v-btn block @click="elije_proveedores()"
           >Proveedores<v-icon></v-icon
         ></v-btn>
-         <v-btn block @click="elije_clientes()">Clientes<v-icon></v-icon></v-btn>
+        <v-btn block @click="elije_informe()">Informe<v-icon></v-icon></v-btn>
+        <v-btn block @click="elije_clientes()">Clientes<v-icon></v-icon></v-btn>
         <v-btn block @click="elije_ventas()">Ventas<v-icon></v-icon></v-btn>
-       
       </v-navigation-drawer>
     </v-sheet>
   </v-app>
@@ -84,6 +85,7 @@ import prueba from "@/components/prueba.vue";
 import catalogo from "@/components/Catalogo.vue";
 import proveedores from "@/components/proveedores.vue";
 import clientes from "@/components/Clientes.vue";
+import informe from "@/components/Informe.vue";
 export default {
   name: "App",
 
@@ -94,11 +96,13 @@ export default {
     prueba,
     catalogo,
     proveedores,
-    clientes
+    clientes,
+    informe,
   },
 
   data: () => ({
-    clie:false,
+    info: false,
+    clie: false,
     provee: false,
     art: false,
     vent: false,
@@ -113,36 +117,53 @@ export default {
     ],
   }),
   methods: {
+    elije_informe() {
+      this.art = false;
+      this.vent = false;
+      this.cate = false;
+      this.provee = false;
+      this.info = true;
+      this.clie = false;
+    },
     elije_proveedores() {
       this.art = false;
       this.vent = false;
       this.cate = false;
       this.provee = true;
+      this.info = false;
+      this.clie = false;
     },
     elije_articulos() {
       this.art = true;
       this.vent = false;
       this.cate = false;
       this.provee = false;
+      this.info = false;
+      this.clie = false;
     },
     elije_ventas() {
       this.vent = true;
       this.art = false;
       this.cate = false;
       this.provee = false;
+      this.info = false;
+      this.clie = false;
     },
     elije_categorias() {
       this.vent = false;
       this.art = false;
       this.cate = true;
       this.provee = false;
+      this.info = false;
+      this.clie = false;
     },
-      elije_clientes() {
+    elije_clientes() {
       this.vent = false;
       this.art = false;
       this.cate = false;
       this.provee = false;
-      this.clie=true
+      this.clie = true;
+      this.info = false;
     },
   },
 };
