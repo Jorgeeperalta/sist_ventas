@@ -23,14 +23,29 @@
           ></v-autocomplete>
         </v-col>
         <v-col md="3" style="margin-top: 30px">
-          <date-picker label="Fecha" v-model="time1" valueType="format"></date-picker
+          <date-picker
+            label="Fecha"
+            v-model="time1"
+            valueType="format"
+          ></date-picker
         ></v-col>
-         <v-col md="3" style="margin-top: 30px">
-           <v-select label="Tipo de Pago" :items="tiposdepago" v-model="tipopago" outlined></v-select>
+        <v-col md="3" style="margin-top: 30px">
+          <v-select
+            label="Tipo de Pago"
+            :items="tiposdepago"
+            v-model="tipopago"
+            outlined
+          ></v-select>
         </v-col>
         <v-col md="3" style="margin-top: 30px">
           <v-btn color="green" @click="filtar()" outlined>Buscar</v-btn>
-          <v-btn style="margin-left: 30px" color="red" @click="limpiar()" outlined>Limpiar</v-btn>
+          <v-btn
+            style="margin-left: 30px"
+            color="red"
+            @click="limpiar()"
+            outlined
+            >Limpiar</v-btn
+          >
         </v-col>
       </v-row>
       <v-label v-if="totalventa != 0"
@@ -42,7 +57,42 @@
         :items="tableventas"
         :items-per-page="5"
         class="elevation-1"
-      ></v-data-table>
+      >
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-icon small class="mr-2" @click="amplia(item)"> mdi-pencil </v-icon>
+        </template>
+      </v-data-table>
+      <v-dialog v-model="dialog" width="500px">
+        <v-card height="700px">
+          <br>
+         <div >
+           <div style="margin-left: 350px">
+          <v-label 
+            >Fecha: {{ detalle.fecha }} <br />
+          </v-label>
+          </div>
+          <br>
+           <div style="margin-left: 50px">
+          <v-label>Cliente: {{ detalle.apellido }} <br /> </v-label>
+           </div>
+           <br>
+           <div style="margin-left: 50px">
+          <v-label>Articulos <br /> </v-label>
+           </div>
+           <div style="margin-left: 50px">
+          <v-label v-for="art in strarts" :key="art">
+            {{ art }} <br />
+          </v-label>
+           </div>
+           <div style="margin-left: 50px">
+          <v-label>Tipo de Pago: {{ detalle.tipopago }} <br /> </v-label>
+           </div>
+            <div style="margin-left: 50px">
+          <v-label>Total: {{ detalle.monto }} <br /> </v-label>
+           </div>
+</div>
+        </v-card>
+      </v-dialog>
     </v-card>
   </v-app>
 </template>
@@ -53,7 +103,9 @@ export default {
   components: { DatePicker },
   data() {
     return {
-        tipopago:null,
+      detalle: [],
+      tipopago: null,
+      dialog: false,
       time1: null,
       aux: [],
       clientes: [],
@@ -71,9 +123,11 @@ export default {
         { text: "Fecha", value: "fecha" },
         { text: "Monto", value: "monto" },
         { text: "Tipo de pago", value: "tipopago" },
+        { text: "Acciones", value: "actions", sortable: false },
       ],
       ventas: [],
       tableventas: [],
+      strarts: [],
     };
   },
   created() {
@@ -81,13 +135,20 @@ export default {
     this.cargaventas();
   },
   methods: {
+    amplia(arts) {
+      this.detalle = arts;
+      var aux = this.detalle.strarticulos;
+      this.strarts = aux.split(["-"]);
+
+      this.dialog = true;
+    },
     limpiar() {
       this.tableventas = [];
       this.time1 = null;
       this.value = null;
       this.totalventa = 0;
       this.aux = [];
-      this.tipopago=null
+      this.tipopago = null;
     },
     filtar() {
       if (this.value != null && this.time1 != null) {
@@ -122,6 +183,7 @@ export default {
         confirm("No se encontraron resultados");
       }
       this.tableventas = this.aux;
+      console.log(this.ventas);
     },
     cargaclientes() {
       var requestOptions = {

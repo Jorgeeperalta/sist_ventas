@@ -2,7 +2,7 @@
   <v-app>
     <v-card class="mx-auto" width="1150">
       <v-row>
-        <v-col md="6"   >
+        <v-col md="6">
           <v-autocomplete
             style="margin-left: 10px; margin-top: 30px"
             v-model="value"
@@ -12,21 +12,17 @@
             dense
             filled
             label="Buscar por apellido"
-            
           ></v-autocomplete>
         </v-col>
-        <v-col md="6" style="margin-top: 25px;">
-          <div style="margin-left: 20px"   @click="asignacliente(value)">
-        Apellido y Nombre: <b> {{ customer.apellido }} </b>
-        <v-spacer></v-spacer> Localidad: <b> {{ customer.localidad }} </b>
-        <v-spacer></v-spacer> Domicilio: <b> {{ customer.domicilio }} </b>
-        <v-spacer></v-spacer> Telefono: <b> {{ customer.telefono }} </b>
-      </div>
-</v-col
-        >
+        <v-col md="6" style="margin-top: 25px">
+          <div style="margin-left: 20px" @click="asignacliente(value)">
+            Apellido y Nombre: <b> {{ customer.apellido }} </b>
+            <v-spacer></v-spacer> Localidad: <b> {{ customer.localidad }} </b>
+            <v-spacer></v-spacer> Domicilio: <b> {{ customer.domicilio }} </b>
+            <v-spacer></v-spacer> Telefono: <b> {{ customer.telefono }} </b>
+          </div>
+        </v-col>
       </v-row>
-
-      
 
       <v-text-field color="purple darken-4" loading disabled></v-text-field>
       <v-toolbar color="purple darken-4">
@@ -48,9 +44,9 @@
         >
         <v-card width="100">
           <v-text-field
-          ref="cantidad"
+            ref="cantidad"
             v-model="totales"
-            v-on:keyup.enter="guardar(cont++),focusInput()"
+            v-on:keyup.enter="guardar(cont++), focusInput()"
             color="light-green accent-3"
           ></v-text-field>
         </v-card>
@@ -64,7 +60,7 @@
         <v-row class="fill-height" justify="center">
           <v-spacer></v-spacer>
 
-          <v-col cols="12" md="8"   @click=" guardarcta(cuen++)">
+          <v-col cols="12" md="8" @click="guardarcta(cuen++)">
             <v-hover v-slot:default="{ hover }" open-delay="200">
               <v-card
                 :elevation="hover ? 16 : 2"
@@ -83,7 +79,6 @@
                     sort-by="precio"
                     class="elevation-1"
                     :custom-filter="filterOnlyCapsText"
-                  
                   >
                     <template v-slot:[`item.actions`]="{ item }">
                       <v-icon
@@ -146,8 +141,10 @@
                 >Acopio</v-btn
               >
             </div>
-            <br>
-            <v-label v-if="ahora==true "><h1> Ahora</h1> </v-label> <v-label v-if="cta==true "><h1> Cta Cte </h1> </v-label> <v-label v-if="acopio==true "><h1>Acopio</h1> </v-label>
+            <br />
+            <v-label v-if="ahora == true"><h1>Ahora</h1> </v-label>
+            <v-label v-if="cta == true"><h1>Cta Cte</h1> </v-label>
+            <v-label v-if="acopio == true"><h1>Acopio</h1> </v-label>
             <br />
             <!--    Ahora    -->
             <v-hover
@@ -166,14 +163,19 @@
                     <v-btn color="pink accent-4" icon>
                       <v-icon> mdi-delete</v-icon>
                     </v-btn>
-                     <v-label > <h2 style="margin-left:90px;" > Total </h2> </v-label>
+                    <v-label>
+                      <h2 style="margin-left: 90px">Total</h2>
+                    </v-label>
                   </v-toolbar>
-                 
+
                   <h1>$ {{ monto }}</h1>
 
                   <v-spacer></v-spacer>
-                  <v-col md="12" >
-                  <v-select :items="tiposdepago" v-model="tipopago"></v-select>
+                  <v-col md="12">
+                    <v-select
+                      :items="tiposdepago"
+                      v-model="tipopago"
+                    ></v-select>
                   </v-col>
                   <div v-if="tipopago == 'Contado'">
                     <v-container>
@@ -193,7 +195,7 @@
                     <v-label>Vuelto </v-label>
                     <h1>$ {{ fin }}</h1>
                   </div>
-                    <v-row>
+                  <v-row>
                     <v-col>
                       <v-btn
                         class="mx-2"
@@ -201,7 +203,7 @@
                         dark
                         large
                         color="green darken-3"
-                        @click="  guardarventa()"
+                        @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
@@ -211,23 +213,20 @@
                         dark
                         large
                         color="amber accent-3"
-                        @click=" guardarventa()"
+                        @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
-                         <v-btn
-                    class="mx-2"
-                    fab
-                    dark
-                    large
-                    color="deep-orange darken-4"
-                    @click="print()"
-                    ><v-icon>mdi-shredder</v-icon></v-btn
-                  >
+                      <v-btn
+                        class="mx-2"
+                        fab
+                        dark
+                        large
+                        color="deep-orange darken-4"
+                        @click="print()"
+                        ><v-icon>mdi-shredder</v-icon></v-btn
+                      >
                     </v-col>
-                  
                   </v-row>
-
-                 
                 </v-card>
               </v-card>
             </v-hover>
@@ -250,9 +249,11 @@
                     <v-btn color="pink accent-4" icon>
                       <v-icon> mdi-delete</v-icon>
                     </v-btn>
-                       <v-label > <h2 style="margin-left:90px;" > Total </h2> </v-label>
+                    <v-label>
+                      <h2 style="margin-left: 90px">Total</h2>
+                    </v-label>
                   </v-toolbar>
-               
+
                   <h1>$ {{ montocta }}</h1>
 
                   <v-spacer></v-spacer>
@@ -275,7 +276,7 @@
                     <v-label>Vuelto </v-label>
                     <h1>$ {{ fin }}</h1>
                   </div>
-               <v-row>
+                  <v-row>
                     <v-col>
                       <v-btn
                         class="mx-2"
@@ -283,7 +284,7 @@
                         dark
                         large
                         color="green darken-3"
-                        @click="  guardarventa()"
+                        @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
@@ -293,28 +294,26 @@
                         dark
                         large
                         color="amber accent-3"
-                        @click=" guardarventa()"
+                        @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
-                         <v-btn
-                    class="mx-2"
-                    fab
-                    dark
-                    large
-                    color="deep-orange darken-4"
-                    @click="print()"
-                    ><v-icon>mdi-shredder</v-icon></v-btn
-                  >
+                      <v-btn
+                        class="mx-2"
+                        fab
+                        dark
+                        large
+                        color="deep-orange darken-4"
+                        @click="print()"
+                        ><v-icon>mdi-shredder</v-icon></v-btn
+                      >
                     </v-col>
-                  
                   </v-row>
-                 
                 </v-card>
               </v-card>
             </v-hover>
             <!--    Cta Cte  Fin  -->
 
-             <!--    Acopio    -->
+            <!--    Acopio    -->
             <v-hover
               v-slot:default="{ hover }"
               close-delay="200"
@@ -331,9 +330,11 @@
                     <v-btn color="pink accent-4" icon>
                       <v-icon> mdi-delete</v-icon>
                     </v-btn>
-                      <v-label > <h2 style="margin-left:90px;" > Total </h2> </v-label>
+                    <v-label>
+                      <h2 style="margin-left: 90px">Total</h2>
+                    </v-label>
                   </v-toolbar>
-                 
+
                   <h1>$ {{ monto }}</h1>
 
                   <v-spacer></v-spacer>
@@ -355,13 +356,12 @@
 
                     <v-label>Vuelto </v-label>
                     <h1>$ {{ fin }}</h1>
-                  
                   </div>
                   <v-label>Fecha estimada de retiro</v-label>
-                  <br>
-                   <date-picker v-model="time1" valueType="format"></date-picker>
-                  
-                    <v-row>
+                  <br />
+                  <date-picker v-model="time1" valueType="format"></date-picker>
+
+                  <v-row>
                     <v-col>
                       <v-btn
                         class="mx-2"
@@ -369,7 +369,7 @@
                         dark
                         large
                         color="green darken-3"
-                        @click=" guardarventa()"
+                        @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
@@ -379,23 +379,20 @@
                         dark
                         large
                         color="amber accent-3"
-                        @click=" guardarventa()"
+                        @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
-                         <v-btn
-                    class="mx-2"
-                    fab
-                    dark
-                    large
-                    color="deep-orange darken-4"
-                    @click="print(),limpiar()"
-                    ><v-icon>mdi-shredder</v-icon></v-btn
-                  >
+                      <v-btn
+                        class="mx-2"
+                        fab
+                        dark
+                        large
+                        color="deep-orange darken-4"
+                        @click="print(), limpiar()"
+                        ><v-icon>mdi-shredder</v-icon></v-btn
+                      >
                     </v-col>
-                  
                   </v-row>
-
-                
                 </v-card>
               </v-card>
             </v-hover>
@@ -411,8 +408,8 @@
 
 <script>
 import jsPDF from "jspdf";
-  import DatePicker from 'vue2-datepicker';
-  import 'vue2-datepicker/index.css';
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
 
 export default {
   components: { DatePicker },
@@ -430,7 +427,12 @@ export default {
     singleSelect: false,
     selected: [],
     value: null,
-    customer: [],
+    customer: [{
+        apellido:'?????',
+        localidad:'?????',
+        domicilio:'???',
+        telefono:'???',
+    }],
     fin: 0,
     efectivo: "",
     monto: 0,
@@ -439,7 +441,7 @@ export default {
     isLoading: false,
     items: [],
     clientes: [],
-
+    strarticulos:'',
     productos: [],
     editedItem: [],
     model: null,
@@ -501,31 +503,31 @@ export default {
   },
 
   methods: {
-     guardarventa(){
-           var formdata = new FormData();
+    guardarventa() {
+      var formdata = new FormData();
 
-        formdata.append("id", "");
-        formdata.append("fkcliente", this.customer.id);
-        formdata.append("fecha", new Date().toISOString().substr(0, 10));
-        formdata.append("monto", this.monto);
-        formdata.append("tipopago", this.tipopago);
-      
+      formdata.append("id", "");
+      formdata.append("fkcliente", this.customer.id);
+      formdata.append("fecha", new Date().toISOString().substr(0, 10));
+      formdata.append("monto", this.monto);
+      formdata.append("tipopago", this.tipopago);
+      formdata.append("strarticulos", this.strarticulos);
 
-        var requestOptions = {
-          method: "POST",
-          body: formdata,
-          redirect: "follow",
-        };
+      var requestOptions = {
+        method: "POST",
+        body: formdata,
+        redirect: "follow",
+      };
 
-        fetch(
-          "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
-          requestOptions
-        )
-          .then((response) => response.text())
-          .then((result) => console.log(result));
-          confirm("Venta Almacenada con exito!!")
-     },
-      focusInput() {
+      fetch(
+        "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then((result) => console.log(result));
+      confirm("Venta Almacenada con exito!!");
+    },
+    focusInput() {
       this.$refs.cantidad.focus();
     },
     mu() {
@@ -558,10 +560,15 @@ export default {
       //    this.productos.push(element)
       //  })
       var horaA = new Date().toISOString().substr(0, 10);
+      var arrayFeha = horaA.split(["-"]);
       let pdfName = "Factura ";
       var contador = 20;
       var doc = new jsPDF();
-      doc.text(20, 5, "Fecha  " + horaA);
+      doc.text(
+        20,
+        5,
+        "Fecha  " + arrayFeha[2] + "-" + arrayFeha[1] + "-" + arrayFeha[0]
+      );
       doc.text(20, 10, "Producto        P.U.      Cant.       Subtotal");
       doc.text(40, 40, "");
       this.productos.forEach((element) => {
@@ -621,29 +628,41 @@ export default {
         this.montocta += Math.round(element.cantidad * element.precio);
       });
 
-      this.productoscta.forEach((element) => {
-        console.log(element);
-      });
+      // this.productoscta.forEach((element) => {
+      //   console.log(element);
+      // });
 
-      console.log(this.montocta);
+    //  console.log(this.montocta);
     },
     guardar(cont) {
+  
       this.items.forEach((element) => {
         if (this.identificador == element.id) {
-          this.productos.push({
-            id: cont,
-            nombre: element.nombre,
-            precio: Math.round(element.precio),
-            cantidad: this.totales,
-            sub_total: Math.round(this.totales * element.precio),
-          });
-          cont++;
-          this.monto += Math.round(this.totales * element.precio);
+          if (element.cantidad == '0') {
+            confirm("No tiene stock disonible de " + element.nombre);
+          } else if (
+            this.totales == element.cantidad ||
+            this.totales < element.cantidad
+          ) {
+            this.productos.push({
+              id: cont,
+              nombre: element.nombre,
+              precio: Math.round(element.precio),
+              cantidad: this.totales,
+              sub_total: Math.round(this.totales * element.precio),
+            });
+            this.strarticulos+= this.totales+ '  ' + element.nombre  + '  '  + element.precio  + '-' + '\n'
+            cont++;
+            this.monto += Math.round(this.totales * element.precio);
+          }
+          if (element.stockminimo < element.cantidad) {
+            confirm("Debe comprar el articulo " + element.nombre);
+          }
         }
       });
 
-      console.log(this.selected);
-      this.identificador=null
+    //  console.log(this.selected);
+      this.identificador = null;
     },
 
     getColor(sub_total) {

@@ -136,12 +136,19 @@
                         </v-col>
                       </v-row>
                       <v-row>
-                        <v-col sm="12" md="12">
+                        <v-col sm="6" md="6">
                           <v-text-field
                             v-model="editedItem.cantidad"
                             label="Cantidad"
                           ></v-text-field>
                         </v-col>
+                        <v-col sm="6" md="6">
+                          <v-text-field
+                            v-model="editedItem.stockminimo"
+                            label="Stock Minimo"
+                          ></v-text-field>
+                        </v-col>
+                       
                       </v-row>
                     </v-container>
                   </v-card-text>
@@ -210,8 +217,9 @@ export default {
 
       { text: "Percio", value: "precio" },
       { text: "Cantidad", value: "cantidad" },
+       { text: "Stock Minimo", value: "stockminimo" },
       { text: "Fecha", value: "fecha"},
-      { text: "Actions", value: "actions", sortable: false },
+      { text: "Acciones", value: "actions", sortable: false },
     ],
     dialogstock: false,
     desserts: [],
@@ -423,7 +431,9 @@ export default {
             "&cantidad=" +
             this.editedItem.cantidad+
             "&fecha=" +
-             new Date().toISOString().substr(0, 10),
+             new Date().toISOString().substr(0, 10)+
+            "&stockminimo=" +
+             this.editedItem.stockminimo,
           requestOptions
         )
           .then((response) => response.text())
@@ -442,6 +452,8 @@ export default {
         formdata.append("url3", this.editedItem.url3);
         formdata.append("cantidad", this.editedItem.cantidad);
          formdata.append("fecha", new Date().toISOString().substr(0, 10));
+         formdata.append("stockminimo", this.editedItem.stockminimo);
+         
         var requestOptions = {
           method: "POST",
           body: formdata,

@@ -121,6 +121,7 @@ export default {
       { loc: "MAR DE AJó", lat: -36.7347632, lng: -56.6903612 },
       { loc: "NUEVA ATLANTIS", lat: -36.7634299, lng: -56.6765584 },
       { loc: "PUNTA MEDANOS", lat: -36.9014655, lng: -56.6886537 },
+      { loc: "????", lat: -36.9014655, lng: -56.6886537 },
     ],
 
     idd: "",
