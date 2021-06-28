@@ -1,6 +1,9 @@
 <template>
   <v-app>
     <v-card class="mx-auto" width="1150">
+       <br />
+      <v-label><h1 style="margin-left: 10px">Ventas</h1></v-label>
+     
       <v-row>
         <v-col md="6">
           <v-autocomplete
@@ -427,12 +430,7 @@ export default {
     singleSelect: false,
     selected: [],
     value: null,
-    customer: [{
-        apellido:'?????',
-        localidad:'?????',
-        domicilio:'???',
-        telefono:'???',
-    }],
+    customer: [],
     fin: 0,
     efectivo: "",
     monto: 0,
@@ -504,6 +502,8 @@ export default {
 
   methods: {
     guardarventa() {
+
+    
       var formdata = new FormData();
 
       formdata.append("id", "");
@@ -654,8 +654,11 @@ export default {
             this.strarticulos+= this.totales+ '  ' + element.nombre  + '  '  + element.precio  + '-' + '\n'
             cont++;
             this.monto += Math.round(this.totales * element.precio);
+          }else if (element.cantidad < this.totales){
+            confirm('La cantidad requerida excede lo disponible  '+ element.nombre + '  ' + element.cantidad + ' unidades en stock')
           }
-          if (element.stockminimo < element.cantidad) {
+          if (this.stockminimo == element.cantidad ||
+            this.stockminimo < element.cantidad) {
             confirm("Debe comprar el articulo " + element.nombre);
           }
         }
