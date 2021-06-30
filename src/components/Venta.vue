@@ -1,9 +1,9 @@
 <template>
   <v-app>
     <v-card class="mx-auto" width="1150">
-       <br />
+      <br />
       <v-label><h1 style="margin-left: 10px">Ventas</h1></v-label>
-     
+
       <v-row>
         <v-col md="6">
           <v-autocomplete
@@ -199,7 +199,7 @@
                     <h1>$ {{ fin }}</h1>
                   </div>
                   <v-row>
-                    <v-col>
+                    <v-col md="12">
                       <v-btn
                         class="mx-2"
                         fab
@@ -227,6 +227,15 @@
                         color="deep-orange darken-4"
                         @click="print()"
                         ><v-icon>mdi-shredder</v-icon></v-btn
+                      >
+                      <v-btn
+                        class="mx-2"
+                        fab
+                        dark
+                        large
+                        color="red"
+                        @click="limpiar()"
+                        ><v-icon>mdi-broom</v-icon></v-btn
                       >
                     </v-col>
                   </v-row>
@@ -280,7 +289,7 @@
                     <h1>$ {{ fin }}</h1>
                   </div>
                   <v-row>
-                    <v-col>
+                    <v-col md="12">
                       <v-btn
                         class="mx-2"
                         fab
@@ -308,6 +317,15 @@
                         color="deep-orange darken-4"
                         @click="print()"
                         ><v-icon>mdi-shredder</v-icon></v-btn
+                      >
+                      <v-btn
+                        class="mx-2"
+                        fab
+                        dark
+                        large
+                        color="red"
+                        @click="limpiar()"
+                        ><v-icon>mdi-broom</v-icon></v-btn
                       >
                     </v-col>
                   </v-row>
@@ -365,7 +383,7 @@
                   <date-picker v-model="time1" valueType="format"></date-picker>
 
                   <v-row>
-                    <v-col>
+                    <v-col md="12">
                       <v-btn
                         class="mx-2"
                         fab
@@ -393,6 +411,15 @@
                         color="deep-orange darken-4"
                         @click="print(), limpiar()"
                         ><v-icon>mdi-shredder</v-icon></v-btn
+                      >
+                      <v-btn
+                        class="mx-2"
+                        fab
+                        dark
+                        large
+                        color="red"
+                        @click="limpiar()"
+                        ><v-icon>mdi-broom</v-icon></v-btn
                       >
                     </v-col>
                   </v-row>
@@ -422,8 +449,8 @@ export default {
     tipopago: null,
     totalcta: null,
     cuen: 0,
-    montocta: null,
-    fincta: null,
+    montocta: 0,
+    fincta:0,
     ahora: false,
     cta: false,
     acopio: false,
@@ -439,7 +466,7 @@ export default {
     isLoading: false,
     items: [],
     clientes: [],
-    strarticulos:'',
+    strarticulos: "",
     productos: [],
     editedItem: [],
     model: null,
@@ -501,31 +528,48 @@ export default {
   },
 
   methods: {
-    guardarventa() {
-
     
-      var formdata = new FormData();
+    guardarventa() {
+      console.log(this.productos);
+      if (this.strarticulos != "") {
+        var formdata = new FormData();
 
-      formdata.append("id", "");
-      formdata.append("fkcliente", this.customer.id);
-      formdata.append("fecha", new Date().toISOString().substr(0, 10));
-      formdata.append("monto", this.monto);
-      formdata.append("tipopago", this.tipopago);
-      formdata.append("strarticulos", this.strarticulos);
+        formdata.append("id", "");
+        formdata.append("fkcliente", this.customer.id);
+        formdata.append("fecha", new Date().toISOString().substr(0, 10));
+        formdata.append("monto", this.monto);
+        formdata.append("tipopago", this.tipopago);
+        formdata.append("strarticulos", this.strarticulos);
 
-      var requestOptions = {
-        method: "POST",
-        body: formdata,
-        redirect: "follow",
-      };
+        var requestOptions = {
+          method: "POST",
+          body: formdata,
+          redirect: "follow",
+        };
 
-      fetch(
-        "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
-        requestOptions
-      )
-        .then((response) => response.text())
-        .then((result) => console.log(result));
-      confirm("Venta Almacenada con exito!!");
+        fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
+          requestOptions
+        )
+          .then(function (response) {
+            if (response.ok) {
+              
+            //  console.log(  response.text());
+              confirm("La venta se almaceno con exito!!");
+            } else {
+              console.log("Respuesta de red OK pero respuesta HTTP no OK");
+            }
+          })
+          
+
+          .catch(function (error) {
+            confirm(
+              "Hubo un problema con la red, intente nuevamente:" + error.message
+            );
+          });
+      } else {
+        confirm("No cuenta con ninguna venta");
+      }
     },
     focusInput() {
       this.$refs.cantidad.focus();
@@ -596,10 +640,14 @@ export default {
     },
     limpiar() {
       this.productos = [];
-      this.fin = "";
-      this.monto = "";
-      this.efectivo = "";
+      this.fin = 0;
+      this.monto = 0;
+      this.efectivo = 0;
       this.identificador = "";
+      this.customer = [];
+      this.tipopago = "";
+      this.strarticulos = "";
+      this.value= "";
     },
     resumen() {
       this.fin = this.efectivo - this.monto;
@@ -632,13 +680,12 @@ export default {
       //   console.log(element);
       // });
 
-    //  console.log(this.montocta);
+      //  console.log(this.montocta);
     },
     guardar(cont) {
-  
       this.items.forEach((element) => {
         if (this.identificador == element.id) {
-          if (element.cantidad == '0') {
+          if (element.cantidad == "0") {
             confirm("No tiene stock disonible de " + element.nombre);
           } else if (
             this.totales == element.cantidad ||
@@ -651,20 +698,35 @@ export default {
               cantidad: this.totales,
               sub_total: Math.round(this.totales * element.precio),
             });
-            this.strarticulos+= this.totales+ '  ' + element.nombre  + '  '  + element.precio  + '-' + '\n'
+            this.strarticulos +=
+              this.totales +
+              "  " +
+              element.nombre +
+              "  " +
+              element.precio +
+              "-" +
+              "\n";
             cont++;
             this.monto += Math.round(this.totales * element.precio);
-          }else if (element.cantidad < this.totales){
-            confirm('La cantidad requerida excede lo disponible  '+ element.nombre + '  ' + element.cantidad + ' unidades en stock')
+          } else if (element.cantidad < this.totales) {
+            confirm(
+              "La cantidad requerida excede lo disponible  " +
+                element.nombre +
+                "  " +
+                element.cantidad +
+                " unidades en stock"
+            );
           }
-          if (this.stockminimo == element.cantidad ||
-            this.stockminimo < element.cantidad) {
+          if (
+            this.stockminimo == element.cantidad ||
+            this.stockminimo < element.cantidad
+          ) {
             confirm("Debe comprar el articulo " + element.nombre);
           }
         }
       });
 
-    //  console.log(this.selected);
+      //  console.log(this.selected);
       this.identificador = null;
     },
 

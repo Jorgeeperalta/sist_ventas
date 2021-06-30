@@ -16,7 +16,7 @@
             v-model="value"
             :items="clientes"
             item-text="apellido"
-            item-value="id"
+            item-value="apellido"
             dense
             filled
             label="Buscar por apellido"
@@ -60,37 +60,36 @@
       >
         <template v-slot:[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="amplia(item)"> mdi-pencil </v-icon>
+          <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
         </template>
       </v-data-table>
       <v-dialog v-model="dialog" width="500px">
         <v-card height="700px">
-          <br>
-         <div >
-           <div style="margin-left: 350px">
-          <v-label 
-            >Fecha: {{ detalle.fecha }} <br />
-          </v-label>
-          </div>
-          <br>
-           <div style="margin-left: 50px">
-          <v-label>Cliente: {{ detalle.apellido }} <br /> </v-label>
-           </div>
-           <br>
-           <div style="margin-left: 50px">
-          <v-label>Articulos <br /> </v-label>
-           </div>
-           <div style="margin-left: 50px">
-          <v-label v-for="art in strarts" :key="art">
-            {{ art }} <br />
-          </v-label>
-           </div>
-           <div style="margin-left: 50px">
-          <v-label>Tipo de Pago: {{ detalle.tipopago }} <br /> </v-label>
-           </div>
+          <br />
+          <div>
+            <div style="margin-left: 350px">
+              <v-label>Fecha: {{ detalle.fecha }} <br /> </v-label>
+            </div>
+            <br />
             <div style="margin-left: 50px">
-          <v-label>Total: {{ detalle.monto }} <br /> </v-label>
-           </div>
-</div>
+              <v-label>Cliente: {{ detalle.apellido }} <br /> </v-label>
+            </div>
+            <br />
+            <div style="margin-left: 50px">
+              <v-label>Articulos <br /> </v-label>
+            </div>
+            <div style="margin-left: 50px">
+              <v-label v-for="art in strarts" :key="art">
+                {{ art }} <br />
+              </v-label>
+            </div>
+            <div style="margin-left: 50px">
+              <v-label>Tipo de Pago: {{ detalle.tipopago }} <br /> </v-label>
+            </div>
+            <div style="margin-left: 50px">
+              <v-label>Total: {{ detalle.monto }} <br /> </v-label>
+            </div>
+          </div>
         </v-card>
       </v-dialog>
     </v-card>
@@ -135,6 +134,33 @@ export default {
     this.cargaventas();
   },
   methods: {
+    deleteItem(item) {
+   //   console.log(item);
+      const index = this.tableventas.indexOf(item);
+
+      var option= confirm("Desea eliminar esta venta! \n  OK or Cancelar.");
+      if(option){
+            var formdata = new FormData();
+
+      var requestOptions = {
+        method: "DELETE",
+        body: formdata,
+        redirect: "follow",
+      };
+
+      fetch(
+        "http://jorgeperalta-001-site6.itempurl.com/ventas.php?id=" + item.id,
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then((result) => console.log(result),this.cargaventas())
+       
+        .catch((error) => console.log("error", error));
+      }
+     
+
+      
+    },
     amplia(arts) {
       this.detalle = arts;
       var aux = this.detalle.strarticulos;
@@ -151,14 +177,23 @@ export default {
       this.tipopago = null;
     },
     filtar() {
-      if (this.value != null && this.time1 != null) {
+      if (this.value != null && this.time1 != null && this.tipopago != null) {
+       // alert(this.value + " " + this.time1 + " " + this.tipopago)
         this.ventas.forEach((element) => {
-          if (this.value == element.fkcliente && this.time1 == element.fecha) {
+          if (this.value == element.apellido && this.time1 == element.fecha && this.tipopago == element.tipopago) {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }
         });
-      } else if (this.time1 != null) {
+      } else if (this.time1 != null && this.tipopago != null) {
+        this.ventas.forEach((element) => {
+          if (this.time1 == element.fecha && this.tipopago == element.tipopago) {
+            this.aux.push(element);
+            this.totalventa += parseInt(element.monto);
+          }
+        });
+      }
+       else if (this.time1 != null) {
         this.ventas.forEach((element) => {
           if (this.time1 == element.fecha) {
             this.aux.push(element);
@@ -167,7 +202,7 @@ export default {
         });
       } else if (this.value != null) {
         this.ventas.forEach((element) => {
-          if (this.value == element.fkcliente) {
+          if (this.value == element.apellido) {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }
@@ -200,6 +235,7 @@ export default {
         .then((result) => (this.clientes = result))
         .catch((error) => console.log("error", error));
     },
+
     cargaventas() {
       var requestOptions = {
         method: "GET",
