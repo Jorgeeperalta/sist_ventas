@@ -450,7 +450,7 @@ export default {
     totalcta: null,
     cuen: 0,
     montocta: 0,
-    fincta:0,
+    fincta: 0,
     ahora: false,
     cta: false,
     acopio: false,
@@ -528,7 +528,16 @@ export default {
   },
 
   methods: {
-    
+    recargaarticulos(){
+        fetch("http://jorgeperalta-001-site6.itempurl.com/articulos.php")
+        .then((res) => res.clone().json())
+        .then((res) => {
+          this.items = res;
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+    },
     guardarventa() {
       console.log(this.productos);
       if (this.strarticulos != "") {
@@ -553,14 +562,14 @@ export default {
         )
           .then(function (response) {
             if (response.ok) {
-              
-            //  console.log(  response.text());
+              //  console.log(  response.text());
               confirm("La venta se almaceno con exito!!");
+             
+          
             } else {
               console.log("Respuesta de red OK pero respuesta HTTP no OK");
             }
           })
-          
 
           .catch(function (error) {
             confirm(
@@ -570,6 +579,30 @@ export default {
       } else {
         confirm("No cuenta con ninguna venta");
       }
+          this.restastock(); 
+    },
+    restastock(){
+      this.productos.forEach((element) => {
+        console.log(element)
+      var formdata = new FormData();
+
+      formdata.append("id", element.pk);
+      formdata.append("resta", element.cantidad);
+
+      var requestOptions = {
+        method: "POST",
+        body: formdata,
+        redirect: "follow",
+      };
+
+      fetch(
+        "http://jorgeperalta-001-site6.itempurl.com/actualizastock.php",
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then((result) => console.log(result));
+      });
+      this.recargaarticulos()
     },
     focusInput() {
       this.$refs.cantidad.focus();
@@ -647,7 +680,7 @@ export default {
       this.customer = [];
       this.tipopago = "";
       this.strarticulos = "";
-      this.value= "";
+      this.value = "";
     },
     resumen() {
       this.fin = this.efectivo - this.monto;
@@ -666,6 +699,7 @@ export default {
       this.montocta = 0;
       this.selected.forEach((element) => {
         this.productoscta.push({
+         
           id: cont,
           nombre: element.nombre,
           precio: Math.round(element.precio),
@@ -692,6 +726,7 @@ export default {
             this.totales < element.cantidad
           ) {
             this.productos.push({
+              pk:element.id,
               id: cont,
               nombre: element.nombre,
               precio: Math.round(element.precio),
