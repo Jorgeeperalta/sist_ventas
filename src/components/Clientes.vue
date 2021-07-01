@@ -1,5 +1,7 @@
 <template>
   <v-card class="mx-auto" width="1200">
+      <br />
+      <v-label><h1 style="margin-left: 10px">Clientes</h1></v-label>
     <v-text-field color="purple darken-4" loading disabled></v-text-field>
     <v-data-table
       :headers="headers"

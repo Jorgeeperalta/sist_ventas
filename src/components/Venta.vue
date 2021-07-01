@@ -717,14 +717,22 @@ export default {
       //  console.log(this.montocta);
     },
     guardar(cont) {
+     
       this.items.forEach((element) => {
         if (this.identificador == element.id) {
           if (element.cantidad == "0") {
             confirm("No tiene stock disonible de " + element.nombre);
           } else if (
-            this.totales == element.cantidad ||
-            this.totales < element.cantidad
+            this.totales == parseInt( element.cantidad) ||
+            this.totales < parseInt( element.cantidad)
           ) {
+          
+            if (
+           parseInt(  element.stockminimo) == parseInt( element.cantidad)||
+            parseInt( element.stockminimo) > parseInt( element.cantidad)
+          ) {
+            confirm("Debe comprar el articulo " + element.nombre);
+          }
             this.productos.push({
               pk:element.id,
               id: cont,
@@ -743,21 +751,16 @@ export default {
               "\n";
             cont++;
             this.monto += Math.round(this.totales * element.precio);
-          } else if (element.cantidad < this.totales) {
+          } else if (parseInt( element.cantidad) < this.totales) {
             confirm(
               "La cantidad requerida excede lo disponible  " +
                 element.nombre +
                 "  " +
                 element.cantidad +
-                " unidades en stock"
+                " unidades en stock" + this.totales
             );
           }
-          if (
-            this.stockminimo == element.cantidad ||
-            this.stockminimo < element.cantidad
-          ) {
-            confirm("Debe comprar el articulo " + element.nombre);
-          }
+          
         }
       });
 
