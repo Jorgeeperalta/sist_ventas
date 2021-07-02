@@ -306,7 +306,7 @@
                         dark
                         large
                         color="amber accent-3"
-                        @click="guardarventa()"
+                        @click=" guardarcta()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
                       <v-btn
@@ -539,7 +539,19 @@ export default {
         });
     },
     guardarventa() {
-      console.log(this.productos);
+      var auxtipoventa=''
+      var auxfecharetiro=''
+      if (this.acopio==true){
+          auxtipoventa='Acopio'
+          auxfecharetiro=this.time1
+      }else if (this.cta==true){
+          auxtipoventa='cta cte'
+      }else if (this.ahora==true){
+          auxtipoventa='Ahora'
+          auxfecharetiro= new Date().toISOString().substr(0, 10)
+      }
+       
+
       if (this.strarticulos != "") {
         var formdata = new FormData();
 
@@ -549,7 +561,8 @@ export default {
         formdata.append("monto", this.monto);
         formdata.append("tipopago", this.tipopago);
         formdata.append("strarticulos", this.strarticulos);
-
+        formdata.append("tipoventa", auxtipoventa);
+        formdata.append("fecharetiro", auxfecharetiro);
         var requestOptions = {
           method: "POST",
           body: formdata,
@@ -631,7 +644,6 @@ export default {
         .catch((error) => console.log("error", error));
     },
     print() {
-    
       var horaA = new Date().toISOString().substr(0, 10);
       var arrayFeha = horaA.split(["-"]);
       let pdfName = "Factura ";
@@ -667,44 +679,41 @@ export default {
       doc.line(10, 75, 200, 75);
       doc.setLineWidth(0.6);
       doc.line(10, 78, 200, 78);
-       doc.setFontSize(9);
+      doc.setFontSize(9);
       doc.text(10, 85, "Cantidad ");
-       doc.setLineWidth(0.6);
-       doc.text(30, 85, "Articulo ");
-        doc.setLineWidth(0.6);
-       doc.text(100, 85, "Precio U.");
-        doc.setLineWidth(0.6);
-       doc.text(170, 85, "Sub Total ");
-       
-       doc.setLineWidth(0.6);
+      doc.setLineWidth(0.6);
+      doc.text(30, 85, "Articulo ");
+      doc.setLineWidth(0.6);
+      doc.text(100, 85, "Precio U.");
+      doc.setLineWidth(0.6);
+      doc.text(170, 85, "Sub Total ");
+
+      doc.setLineWidth(0.6);
       doc.line(10, 88, 200, 88);
 
-      var contador = 95
+      var contador = 95;
 
-      
-
-     
       this.productos.forEach((element) => {
-        console.log(element)
-      //    doc.setFontSize(9);
-       doc.text(10, contador,'  '+element.cantidad);
-       doc.setLineWidth(0.6);
-       doc.text(30, contador,' '+ element.nombre);
+        console.log(element);
+        //    doc.setFontSize(9);
+        doc.text(10, contador, "  " + element.cantidad);
         doc.setLineWidth(0.6);
-       doc.text(100, contador,''+ element.precio);
+        doc.text(30, contador, " " + element.nombre);
         doc.setLineWidth(0.6);
-       doc.text(170, contador, ''+ element.sub_total);
-       
+        doc.text(100, contador, "" + element.precio);
+        doc.setLineWidth(0.6);
+        doc.text(170, contador, "" + element.sub_total);
+
         contador = contador + 10;
       });
       contador = contador + 10;
-        doc.setFontSize(14);
+      doc.setFontSize(14);
       doc.text(10, contador, "Total $  " + Math.round(this.monto));
       contador = contador + 10;
       doc.text(10, contador, "Entrego $  " + this.efectivo);
       contador = contador + 10;
       doc.text(10, contador, "Su vuelto $  " + Math.round(this.fin));
-      
+
       doc.save(pdfName + ".pdf");
     },
     limpiar() {
@@ -731,7 +740,8 @@ export default {
         this.productos.splice(index, 1);
     },
 
-    guardarcta(cont) {
+    guardarcta() {
+      let cont=0;
       this.productoscta = [];
       this.montocta = 0;
       this.selected.forEach((element) => {
@@ -746,9 +756,9 @@ export default {
         this.montocta += Math.round(element.cantidad * element.precio);
       });
 
-      // this.productoscta.forEach((element) => {
-      //   console.log(element);
-      // });
+      this.productoscta.forEach((element) => {
+        console.log(element);
+      });
 
       //  console.log(this.montocta);
     },

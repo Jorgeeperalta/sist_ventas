@@ -75,6 +75,10 @@
               <v-label>Cliente: {{ detalle.apellido }} <br /> </v-label>
             </div>
             <br />
+             <div style="margin-left: 50px">
+              <v-label>Tipo de venta: {{ detalle.tipoventa }} <br> Fecha Estimada de retiro {{detalle.fecharetiro}} <br /> </v-label>
+            </div>
+            <br />
             <div style="margin-left: 50px">
               <v-label>Articulos <br /> </v-label>
             </div>
@@ -122,6 +126,7 @@ export default {
         { text: "Fecha", value: "fecha" },
         { text: "Monto", value: "monto" },
         { text: "Tipo de pago", value: "tipopago" },
+         { text: "Tipo de venta", value: "tipoventa" },
         { text: "Acciones", value: "actions", sortable: false },
       ],
       ventas: [],
