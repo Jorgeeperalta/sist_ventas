@@ -444,6 +444,8 @@ import "vue2-datepicker/index.css";
 export default {
   components: { DatePicker },
   data: () => ({
+      auxtipoventa:'',
+     auxfecharetiro:'',
     time1: null,
     tiposdepago: ["Contado", "Targeta", "Cheque", "Cta. DNI", "Mercado Pago"],
     tipopago: null,
@@ -539,16 +541,15 @@ export default {
         });
     },
     guardarventa() {
-      var auxtipoventa=''
-      var auxfecharetiro=''
+     
       if (this.acopio==true){
-          auxtipoventa='Acopio'
-          auxfecharetiro=this.time1
+          this.auxtipoventa='Acopio'
+          this.auxfecharetiro=this.time1
       }else if (this.cta==true){
-          auxtipoventa='cta cte'
+          this.auxtipoventa='cta cte'
       }else if (this.ahora==true){
-          auxtipoventa='Ahora'
-          auxfecharetiro= new Date().toISOString().substr(0, 10)
+          this.auxtipoventa='Ahora'
+          this.auxfecharetiro= new Date().toISOString().substr(0, 10)
       }
        
 
@@ -561,8 +562,8 @@ export default {
         formdata.append("monto", this.monto);
         formdata.append("tipopago", this.tipopago);
         formdata.append("strarticulos", this.strarticulos);
-        formdata.append("tipoventa", auxtipoventa);
-        formdata.append("fecharetiro", auxfecharetiro);
+        formdata.append("tipoventa", this.auxtipoventa);
+        formdata.append("fecharetiro", this.auxfecharetiro);
         var requestOptions = {
           method: "POST",
           body: formdata,
@@ -675,6 +676,14 @@ export default {
       doc.text(130, 57, "Domicilio:  " + this.customer.domicilio);
       doc.setFontSize(13);
       doc.text(10, 67, "Localidad:  " + this.customer.localidad);
+      doc.setFontSize(13);
+      doc.text(130, 67, "Retira: " + this.auxtipoventa);
+      if(this.auxtipoventa=="Acopio"){
+        doc.setFontSize(13);
+        doc.setTextColor("red");
+        doc.text(165, 67, " " + this.auxfecharetiro);
+      }
+      doc.setTextColor(0, 0, 0);
       doc.setLineWidth(0.8);
       doc.line(10, 75, 200, 75);
       doc.setLineWidth(0.6);
