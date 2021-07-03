@@ -210,7 +210,7 @@
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
-                      <v-btn
+                      <!-- <v-btn
                         class="mx-2"
                         fab
                         dark
@@ -218,7 +218,7 @@
                         color="amber accent-3"
                         @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
-                      >
+                      > -->
                       <v-btn
                         class="mx-2"
                         fab
@@ -300,7 +300,7 @@
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
-                      <v-btn
+                      <!-- <v-btn
                         class="mx-2"
                         fab
                         dark
@@ -308,7 +308,7 @@
                         color="amber accent-3"
                         @click=" guardarcta()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
-                      >
+                      > -->
                       <v-btn
                         class="mx-2"
                         fab
@@ -394,7 +394,7 @@
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       >
 
-                      <v-btn
+                      <!-- <v-btn
                         class="mx-2"
                         fab
                         dark
@@ -402,7 +402,7 @@
                         color="amber accent-3"
                         @click="guardarventa()"
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
-                      >
+                      > -->
                       <v-btn
                         class="mx-2"
                         fab
@@ -444,8 +444,8 @@ import "vue2-datepicker/index.css";
 export default {
   components: { DatePicker },
   data: () => ({
-      auxtipoventa:'',
-     auxfecharetiro:'',
+    auxtipoventa: "",
+    auxfecharetiro: "",
     time1: null,
     tiposdepago: ["Contado", "Targeta", "Cheque", "Cta. DNI", "Mercado Pago"],
     tipopago: null,
@@ -541,17 +541,15 @@ export default {
         });
     },
     guardarventa() {
-     
-      if (this.acopio==true){
-          this.auxtipoventa='Acopio'
-          this.auxfecharetiro=this.time1
-      }else if (this.cta==true){
-          this.auxtipoventa='cta cte'
-      }else if (this.ahora==true){
-          this.auxtipoventa='Ahora'
-          this.auxfecharetiro= new Date().toISOString().substr(0, 10)
+      if (this.acopio == true) {
+        this.auxtipoventa = "Acopio";
+        this.auxfecharetiro = this.time1;
+      } else if (this.cta == true) {
+        this.auxtipoventa = "cta cte";
+      } else if (this.ahora == true) {
+        this.auxtipoventa = "Ahora";
+        this.auxfecharetiro = new Date().toISOString().substr(0, 10);
       }
-       
 
       if (this.strarticulos != "") {
         var formdata = new FormData();
@@ -678,7 +676,7 @@ export default {
       doc.text(10, 67, "Localidad:  " + this.customer.localidad);
       doc.setFontSize(13);
       doc.text(130, 67, "Retira: " + this.auxtipoventa);
-      if(this.auxtipoventa=="Acopio"){
+      if (this.auxtipoventa == "Acopio") {
         doc.setFontSize(13);
         doc.setTextColor("red");
         doc.text(165, 67, " " + this.auxfecharetiro);
@@ -709,16 +707,58 @@ export default {
         doc.setLineWidth(0.6);
         doc.text(30, contador, " " + element.nombre);
         doc.setLineWidth(0.6);
+        if (this.auxtipoventa == "cta cte") {
+          doc.text(100, contador, "" );
+          doc.setLineWidth(0.6);
+          doc.text(170, contador, "" );
+         
+        }else{
         doc.text(100, contador, "" + element.precio);
         doc.setLineWidth(0.6);
         doc.text(170, contador, "" + element.sub_total);
 
+        }
+        
+
         contador = contador + 10;
       });
+       if (this.auxtipoventa == "cta cte") {
+         contador = contador +20
+        doc.setDrawColor(255, 0, 0); 
+         doc.setLineWidth(0.4);
+         doc.line(10,contador-10, 200, contador-10);
+          doc.text(90, contador-7, " Articulos Pagados" );
+          this.productoscta.forEach((element) => {
+        console.log(element);
+        //    doc.setFontSize(9);
+        doc.text(10, contador, "  " + element.cantidad);
+        doc.setLineWidth(0.6);
+        doc.text(30, contador, " " + element.nombre);
+        doc.setLineWidth(0.6);
+        
+        doc.text(100, contador, "" + element.precio);
+        doc.setLineWidth(0.6);
+        doc.text(170, contador, "" + element.sub_total);
+
+       
+        
+
+        contador = contador + 10;
+      });
+       }
       contador = contador + 10;
+
       doc.setFontSize(14);
-      doc.text(10, contador, "Total $  " + Math.round(this.monto));
+      if (this.auxtipoventa == "cta cte") {
+         doc.text(10, contador, "Total $  " + Math.round(this.montocta));
       contador = contador + 10;
+      }else{
+         doc.text(10, contador, "Total $  " + Math.round(this.monto));
+      contador = contador + 10;
+
+      }
+
+     
       doc.text(10, contador, "Entrego $  " + this.efectivo);
       contador = contador + 10;
       doc.text(10, contador, "Su vuelto $  " + Math.round(this.fin));
@@ -726,6 +766,7 @@ export default {
       doc.save(pdfName + ".pdf");
     },
     limpiar() {
+      this.montocta=0;
       this.productos = [];
       this.fin = 0;
       this.monto = 0;
@@ -750,11 +791,12 @@ export default {
     },
 
     guardarcta() {
-      let cont=0;
+      let cont = 0;
       this.productoscta = [];
       this.montocta = 0;
       this.selected.forEach((element) => {
         this.productoscta.push({
+          pk: element.pk,
           id: cont,
           nombre: element.nombre,
           precio: Math.round(element.precio),
