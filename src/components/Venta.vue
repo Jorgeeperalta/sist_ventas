@@ -116,17 +116,63 @@
             </v-hover>
           </v-col>
 
-          <v-col cols="12" sm="4">
+          <v-col md="4" sm="4">
             <br />
             <div>
-              <v-btn
-                style="margin-top: -8px; margin-left: 0px"
-                outlined
-                color="green"
-                @click="(cta = false), (ahora = true), (acopio = false)"
-                >Ahora</v-btn
-              >
-              <v-btn
+              <v-col md="11">
+                <v-row>
+                  <v-col md="12">
+                <v-btn
+                  block
+                  style="
+                    margin-top: -18px;
+                    margin-left: 10px;
+                    margin-right: 0px;
+                  "
+                  @click="
+                    ((presupuesto = true),
+                    (ahora = false),
+                    (acopio = false),
+                    print()),
+                      guardarcta(cuen++)
+                  "
+                  outlined
+                  color="yellow"
+                  >Presupuesto</v-btn
+                >
+                  </v-col>
+                </v-row>
+
+              
+                <v-row>
+                  <v-col md="6">
+                    <v-btn
+                    block
+                      style="margin-top: -8px; margin-left: 0px"
+                      outlined
+                      color="green"
+                      @click="
+                        (presupuesto = false), (ahora = true), (acopio = false)
+                      "
+                      >Ahora</v-btn
+                    >
+                  </v-col>
+                  <v-col md="6">
+                    <v-btn
+                    block
+                      style="margin-top: -8px; margin-left: 20px"
+                      @click="
+                        (presupuesto = false), (ahora = false), (acopio = true)
+                      "
+                      outlined
+                      color="red"
+                      >Acopio</v-btn
+                    >
+                  </v-col>
+                </v-row>
+                <br />
+              </v-col>
+              <!-- <v-btn
                 style="margin-top: -8px; margin-left: 20px"
                 @click="
                   ((cta = true), (ahora = false), (acopio = false)),
@@ -135,14 +181,7 @@
                 outlined
                 color="yellow"
                 >Cta. Cte.</v-btn
-              >
-              <v-btn
-                style="margin-top: -8px; margin-left: 20px"
-                @click="(cta = false), (ahora = false), (acopio = true)"
-                outlined
-                color="red"
-                >Acopio</v-btn
-              >
+              > -->
             </div>
             <br />
             <v-label v-if="ahora == true"><h1>Ahora</h1> </v-label>
@@ -178,6 +217,7 @@
                     <v-select
                       :items="tiposdepago"
                       v-model="tipopago"
+                      multiple
                     ></v-select>
                   </v-col>
                   <div v-if="tipopago == 'Contado'">
@@ -444,10 +484,20 @@ import "vue2-datepicker/index.css";
 export default {
   components: { DatePicker },
   data: () => ({
+    numerodeventa:0,
+    salidapost:'',
     auxtipoventa: "",
     auxfecharetiro: "",
     time1: null,
-    tiposdepago: ["Contado", "Targeta", "Cheque", "Cta. DNI", "Mercado Pago"],
+    tiposdepago: [
+      "Contado",
+      "Targeta",
+      "Cheque",
+      "Cta. DNI",
+      "Mercado Pago",
+      "Transferencia",
+      "Debe",
+    ],
     tipopago: null,
     totalcta: null,
     cuen: 0,
@@ -468,6 +518,7 @@ export default {
     isLoading: false,
     items: [],
     clientes: [],
+    presupuesto: false,
     strarticulos: "",
     productos: [],
     editedItem: [],
@@ -547,7 +598,7 @@ export default {
       } else if (this.cta == true) {
         this.auxtipoventa = "cta cte";
       } else if (this.ahora == true) {
-        this.auxtipoventa = "Ahora";
+        this.auxtipoventa = "Retirado";
         this.auxfecharetiro = new Date().toISOString().substr(0, 10);
       }
 
@@ -562,6 +613,7 @@ export default {
         formdata.append("strarticulos", this.strarticulos);
         formdata.append("tipoventa", this.auxtipoventa);
         formdata.append("fecharetiro", this.auxfecharetiro);
+        formdata.append("fechasalida", this.auxfecharetiro);
         var requestOptions = {
           method: "POST",
           body: formdata,
@@ -572,20 +624,24 @@ export default {
           "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
           requestOptions
         )
-          .then(function (response) {
-            if (response.ok) {
-              //  console.log(  response.text());
-              confirm("La venta se almaceno con exito!!");
-            } else {
-              console.log("Respuesta de red OK pero respuesta HTTP no OK");
-            }
-          })
+        .then((response) => response.json())
+       // .then((result) => console.log(result))
+        .then((result) => (this.salidapost= result),confirm("La venta se almaceno con exito!!"))
+        .catch((error) => console.log("error", error));
+          // .then(function (response) {
+          //   if (response.ok) {
+          //     //  console.log(  response.text());
+          //     confirm("La venta se almaceno con exito!!");
+          //   } else {
+          //     console.log("Respuesta de red OK pero respuesta HTTP no OK");
+          //   }
+          // })
 
-          .catch(function (error) {
-            confirm(
-              "Hubo un problema con la red, intente nuevamente:" + error.message
-            );
-          });
+          // .catch(function (error) {
+          //   confirm(
+          //     "Hubo un problema con la red, intente nuevamente:" + error.message
+          //   );
+          // });
       } else {
         confirm("No cuenta con ninguna venta");
       }
@@ -643,6 +699,8 @@ export default {
         .catch((error) => console.log("error", error));
     },
     print() {
+      console.log(this.salidapost)
+      //this.numerodeventa=this.salidapost.idventa;
       var horaA = new Date().toISOString().substr(0, 10);
       var arrayFeha = horaA.split(["-"]);
       let pdfName = "Factura ";
@@ -660,14 +718,20 @@ export default {
         12,
         "Fecha:  " + arrayFeha[2] + "-" + arrayFeha[1] + "-" + arrayFeha[0]
       );
-      doc.setFontSize(14);
-      doc.text(10, 12, "Remito:  " + 546464);
+      if (this.presupuesto == true) {
+        doc.setFontSize(14);
+        doc.text(10, 12, "Presupuesto");
+      } else {
+        doc.text(10, 12, "Remito:  " + this.salidapost.idventa);
+      }
       doc.setFontSize(8);
       doc.text(150, 30, "Uso interno");
       doc.setFontSize(13);
       doc.text(10, 47, "Condicion de IVA : Consumidor Final  ");
       doc.setFontSize(13);
-      doc.text(130, 47, "Tipo de Pago:  " + this.tipopago);
+      if (this.presupuesto != true) {
+        doc.text(130, 47, "Tipo de Pago:  " + this.tipopago);
+      }
       doc.setFontSize(13);
       doc.text(10, 57, "Apellido y Nombre:  " + this.customer.apellido);
       doc.setFontSize(13);
@@ -675,7 +739,12 @@ export default {
       doc.setFontSize(13);
       doc.text(10, 67, "Localidad:  " + this.customer.localidad);
       doc.setFontSize(13);
-      doc.text(130, 67, "Retira: " + this.auxtipoventa);
+      if (this.presupuesto == true) {
+        doc.text(130, 67, "Presupuesto");
+      } else {
+        doc.text(130, 67, "Retira: " + this.auxtipoventa);
+      }
+
       if (this.auxtipoventa == "Acopio") {
         doc.setFontSize(13);
         doc.setTextColor("red");
@@ -708,65 +777,65 @@ export default {
         doc.text(30, contador, " " + element.nombre);
         doc.setLineWidth(0.6);
         if (this.auxtipoventa == "cta cte") {
-          doc.text(100, contador, "" );
+          doc.text(100, contador, "");
           doc.setLineWidth(0.6);
-          doc.text(170, contador, "" );
-         
-        }else{
-        doc.text(100, contador, "" + element.precio);
-        doc.setLineWidth(0.6);
-        doc.text(170, contador, "" + element.sub_total);
-
+          doc.text(170, contador, "");
+        } else {
+          doc.text(100, contador, "" + element.precio);
+          doc.setLineWidth(0.6);
+          doc.text(170, contador, "" + element.sub_total);
         }
-        
 
         contador = contador + 10;
       });
-       if (this.auxtipoventa == "cta cte") {
-         contador = contador +20
-        doc.setDrawColor(255, 0, 0); 
-         doc.setLineWidth(0.4);
-         doc.line(10,contador-10, 200, contador-10);
-          doc.text(90, contador-7, " Articulos Pagados" );
-          this.productoscta.forEach((element) => {
-        console.log(element);
-        //    doc.setFontSize(9);
-        doc.text(10, contador, "  " + element.cantidad);
-        doc.setLineWidth(0.6);
-        doc.text(30, contador, " " + element.nombre);
-        doc.setLineWidth(0.6);
-        
-        doc.text(100, contador, "" + element.precio);
-        doc.setLineWidth(0.6);
-        doc.text(170, contador, "" + element.sub_total);
+      if (this.auxtipoventa == "cta cte") {
+        contador = contador + 20;
+        doc.setDrawColor(255, 0, 0);
+        doc.setLineWidth(0.4);
+        doc.line(10, contador - 10, 200, contador - 10);
+        doc.text(90, contador - 7, " Articulos Pagados");
+        this.productoscta.forEach((element) => {
+          console.log(element);
+          //    doc.setFontSize(9);
+          doc.text(10, contador, "  " + element.cantidad);
+          doc.setLineWidth(0.6);
+          doc.text(30, contador, " " + element.nombre);
+          doc.setLineWidth(0.6);
 
-       
-        
+          doc.text(100, contador, "" + element.precio);
+          doc.setLineWidth(0.6);
+          doc.text(170, contador, "" + element.sub_total);
 
-        contador = contador + 10;
-      });
-       }
+          contador = contador + 10;
+        });
+      }
       contador = contador + 10;
 
       doc.setFontSize(14);
-      if (this.auxtipoventa == "cta cte") {
-         doc.text(10, contador, "Total $  " + Math.round(this.montocta));
-      contador = contador + 10;
-      }else{
-         doc.text(10, contador, "Total $  " + Math.round(this.monto));
-      contador = contador + 10;
+      if (this.presupuesto != true) {
+        if (this.auxtipoventa == "cta cte") {
+          doc.text(10, contador, "Total $  " + Math.round(this.montocta));
+          contador = contador + 10;
+        } else {
+          doc.text(10, contador, "Total $  " + Math.round(this.monto));
+          contador = contador + 10;
+        }
 
+        doc.text(10, contador, "Entrego $  " + this.efectivo);
+        contador = contador + 10;
+        doc.text(10, contador, "Su vuelto $  " + Math.round(this.fin));
+      } else {
+        doc.text(
+          10,
+          contador,
+          "Los precios estan sujetos a cambio sin previo aviso"
+        );
       }
-
-     
-      doc.text(10, contador, "Entrego $  " + this.efectivo);
-      contador = contador + 10;
-      doc.text(10, contador, "Su vuelto $  " + Math.round(this.fin));
 
       doc.save(pdfName + ".pdf");
     },
     limpiar() {
-      this.montocta=0;
+      this.montocta = 0;
       this.productos = [];
       this.fin = 0;
       this.monto = 0;

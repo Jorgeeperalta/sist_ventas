@@ -35,6 +35,7 @@
             :items="tiposdepago"
             v-model="tipopago"
             outlined
+            multiple
           ></v-select>
         </v-col>
         <v-col md="3" style="margin-top: 30px">
@@ -75,9 +76,10 @@
               <v-label>Cliente: {{ detalle.apellido }} <br /> </v-label>
             </div>
             <br />
-             <div style="margin-left: 50px">
-              <v-label>Tipo de venta: {{ detalle.tipoventa }} <br> Fecha Estimada de retiro {{detalle.fecharetiro}} <br /> </v-label>
+             <div style="margin-left: 50px" v-if="detalle.tipoventa=='Acopio'">
+              <v-label>Estado: {{ detalle.tipoventa }} <br> Fecha Estimada de retiro {{detalle.fecharetiro}} <br /> </v-label>
             </div>
+            <div v-else style="margin-left: 50px"> <v-label>Estado: {{ detalle.tipoventa }} <br> Fecha de salida: {{detalle.fechasalida}} </v-label> </div>
             <br />
             <div style="margin-left: 50px">
               <v-label>Articulos <br /> </v-label>
@@ -93,6 +95,11 @@
             <div style="margin-left: 50px">
               <v-label>Total: {{ detalle.monto }} <br /> </v-label>
             </div>
+            <br />
+             <div style="margin-left: 50px" v-if="detalle.tipoventa=='Acopio'">
+              <v-btn outlined color="red"  @click="actualizaestado(detalle.id)">Retirado</v-btn>
+            </div>
+
           </div>
         </v-card>
       </v-dialog>
@@ -115,7 +122,7 @@ export default {
       value: null,
       ventas: [],
       totalventa: 0,
-      tiposdepago: ["Contado", "Targeta", "Cheque", "Cta. DNI", "Mercado Pago"],
+      tiposdepago: ["Contado", "Targeta", "Cheque", "Cta. DNI", "Mercado Pago", "Transferencia", "Debe"],
       headers: [
         {
           text: "Apellido y nombre",
@@ -126,7 +133,7 @@ export default {
         { text: "Fecha", value: "fecha" },
         { text: "Monto", value: "monto" },
         { text: "Tipo de pago", value: "tipopago" },
-         { text: "Tipo de venta", value: "tipoventa" },
+         { text: "Estado", value: "tipoventa" },
         { text: "Acciones", value: "actions", sortable: false },
       ],
       ventas: [],
@@ -139,6 +146,30 @@ export default {
     this.cargaventas();
   },
   methods: {
+    actualizaestado(pk){
+      alert(pk)
+          var formdata = new FormData();
+
+      var requestOptions = {
+        method: "PUT",
+        body: formdata,
+        redirect: "follow",
+      };
+
+      fetch(
+        "http://jorgeperalta-001-site6.itempurl.com/ventas.php?id=" +
+          pk +
+          "&tipoventa=" +
+          'Retirado'  +
+          "&fechasalida=" +
+          new Date().toISOString().substr(0, 10) +
+          "",
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then((result) => console.log(result))
+        .catch((error) => console.log("error", error));
+    },
     deleteItem(item) {
    //   console.log(item);
       const index = this.tableventas.indexOf(item);
@@ -185,36 +216,36 @@ export default {
       if (this.value != null && this.time1 != null && this.tipopago != null) {
        // alert(this.value + " " + this.time1 + " " + this.tipopago)
         this.ventas.forEach((element) => {
-          if (this.value == element.apellido && this.time1 == element.fecha && this.tipopago == element.tipopago) {
+          if (this.value == element.apellido && this.time1 == element.fecha && this.tipopago == element.tipopago && element.tipopago !='Debe') {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.time1 != null && this.tipopago != null) {
         this.ventas.forEach((element) => {
-          if (this.time1 == element.fecha && this.tipopago == element.tipopago) {
+          if (this.time1 == element.fecha && this.tipopago == element.tipopago && element.tipopago !='Debe') {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }
         });
       }
-       else if (this.time1 != null) {
+       else if (this.time1 != null ) {
         this.ventas.forEach((element) => {
-          if (this.time1 == element.fecha) {
+          if (this.time1 == element.fecha && element.tipopago !='Debe') {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.value != null) {
         this.ventas.forEach((element) => {
-          if (this.value == element.apellido) {
+          if (this.value == element.apellido && element.tipopago !='Debe') {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.tipopago != null) {
         this.ventas.forEach((element) => {
-          if (this.tipopago == element.tipopago) {
+          if (this.tipopago == element.tipopago && element.tipopago !='Debe') {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }
@@ -253,6 +284,7 @@ export default {
         requestOptions
       )
         .then((response) => response.json())
+        //.then((result) => (console.log(result)))
         .then((result) => (this.ventas = result))
         .catch((error) => console.log("error", error));
     },
