@@ -1,6 +1,15 @@
 <template>
   <v-app>
     <v-card class="mx-auto" width="1150">
+      <v-snackbar
+        style="margin-top: 20px"
+        v-model="snackbar"
+        :timeout="timeout"
+        color="blue"
+      >
+        {{ tipopago }} {{ montomoneda }}
+      </v-snackbar>
+
       <br />
       <v-label><h1 style="margin-left: 10px">Ventas</h1></v-label>
 
@@ -27,7 +36,59 @@
         </v-col>
       </v-row>
 
-      <v-text-field color="purple darken-4" loading disabled></v-text-field>
+      <div>
+        <v-row>
+          <v-col md="4">
+            <v-btn
+              block
+              style="margin-top: -8px; margin-left: 10px"
+              @click="
+                ((presupuesto = true),
+                (ahora = false),
+                (acopio = false),
+                print()),
+                  guardarcta(cuen++)
+              "
+              outlined
+              color="yellow"
+              >Presupuesto</v-btn
+            >
+          </v-col>
+
+          <v-col md="4">
+            <v-btn
+              block
+              style="margin-top: -8px; margin-left: 2px"
+              outlined
+              color="green"
+              @click="(presupuesto = false), (ahora = true), (acopio = false)"
+              >Ahora</v-btn
+            >
+          </v-col>
+          <v-col md="">
+            <v-btn
+              block
+              style="margin-top: -8px; margin-left: -5px"
+              @click="(presupuesto = false), (ahora = false), (acopio = true)"
+              outlined
+              color="red"
+              >Acopio</v-btn
+            >
+          </v-col>
+        </v-row>
+
+        <!-- <v-btn
+                style="margin-top: -8px; margin-left: 20px"
+                @click="
+                  ((cta = true), (ahora = false), (acopio = false)),
+                    guardarcta(cuen++)
+                "
+                outlined
+                color="yellow"
+                >Cta. Cte.</v-btn
+              > -->
+      </div>
+
       <v-toolbar color="purple darken-4">
         <v-app-bar-nav-icon class="hidden-sm-and-down"></v-app-bar-nav-icon>
         <v-toolbar-title class="title mr-6 hidden-sm-and-down"
@@ -54,8 +115,6 @@
           ></v-text-field>
         </v-card>
       </v-toolbar>
-
-      <v-text-field color="purple darken-4" loading disabled></v-text-field>
     </v-card>
 
     <template>
@@ -117,79 +176,9 @@
           </v-col>
 
           <v-col md="4" sm="4">
-            <br />
-            <div>
-              <v-col md="11">
-                <v-row>
-                  <v-col md="12">
-                <v-btn
-                  block
-                  style="
-                    margin-top: -18px;
-                    margin-left: 10px;
-                    margin-right: 0px;
-                  "
-                  @click="
-                    ((presupuesto = true),
-                    (ahora = false),
-                    (acopio = false),
-                    print()),
-                      guardarcta(cuen++)
-                  "
-                  outlined
-                  color="yellow"
-                  >Presupuesto</v-btn
-                >
-                  </v-col>
-                </v-row>
-
-              
-                <v-row>
-                  <v-col md="6">
-                    <v-btn
-                    block
-                      style="margin-top: -8px; margin-left: 0px"
-                      outlined
-                      color="green"
-                      @click="
-                        (presupuesto = false), (ahora = true), (acopio = false)
-                      "
-                      >Ahora</v-btn
-                    >
-                  </v-col>
-                  <v-col md="6">
-                    <v-btn
-                    block
-                      style="margin-top: -8px; margin-left: 20px"
-                      @click="
-                        (presupuesto = false), (ahora = false), (acopio = true)
-                      "
-                      outlined
-                      color="red"
-                      >Acopio</v-btn
-                    >
-                  </v-col>
-                </v-row>
-                <br />
-              </v-col>
-              <!-- <v-btn
-                style="margin-top: -8px; margin-left: 20px"
-                @click="
-                  ((cta = true), (ahora = false), (acopio = false)),
-                    guardarcta(cuen++)
-                "
-                outlined
-                color="yellow"
-                >Cta. Cte.</v-btn
-              > -->
-            </div>
-            <br />
-            <v-label v-if="ahora == true"><h1>Ahora</h1> </v-label>
-            <v-label v-if="cta == true"><h1>Cta Cte</h1> </v-label>
-            <v-label v-if="acopio == true"><h1>Acopio</h1> </v-label>
-            <br />
             <!--    Ahora    -->
             <v-hover
+              style="margin-top: 15px"
               v-slot:default="{ hover }"
               close-delay="200"
               v-if="ahora == true"
@@ -202,23 +191,33 @@
               >
                 <v-card width="350">
                   <v-toolbar color="purple darken-4" dark>
-                    <v-btn color="pink accent-4" icon>
+                    <!-- <v-btn color="pink accent-4" icon>
                       <v-icon> mdi-delete</v-icon>
-                    </v-btn>
-                    <v-label>
-                      <h2 style="margin-left: 90px">Total</h2>
-                    </v-label>
+                    </v-btn> -->
+                    <v-col md="12">
+                      <v-label v-if="ahora == true"
+                        ><h1>*******Ahora*******</h1>
+                      </v-label>
+                      <v-label v-if="cta == true"><h1>Cta Cte</h1> </v-label>
+                      <v-label v-if="acopio == true"><h1>Acopio</h1> </v-label>
+                    </v-col>
                   </v-toolbar>
 
-                  <h1>$ {{ monto }}</h1>
+                  <h1>Total $ {{ monto }}</h1>
 
                   <v-spacer></v-spacer>
                   <v-col md="12">
                     <v-select
                       :items="tiposdepago"
                       v-model="tipopago"
-                      multiple
                     ></v-select>
+                    <v-text-field
+                      v-model="montomoneda"
+                      :label="tipopago"
+                    ></v-text-field>
+                    <v-btn block color="purple" outlined @click="agregatipopago(), (snackbar = true)"
+                      >Guardar Forma de pago</v-btn
+                    >
                   </v-col>
                   <div v-if="tipopago == 'Contado'">
                     <v-container>
@@ -241,13 +240,14 @@
                   <v-row>
                     <v-col md="12">
                       <v-btn
+                      outlined
                         class="mx-2"
                         fab
                         dark
                         large
                         color="green darken-3"
                         @click="guardarventa()"
-                        ><v-icon>mdi-currency-usd</v-icon></v-btn
+                        ><v-icon>mdi-database-plus</v-icon></v-btn
                       >
 
                       <!-- <v-btn
@@ -260,6 +260,7 @@
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       > -->
                       <v-btn
+                      outlined
                         class="mx-2"
                         fab
                         dark
@@ -269,6 +270,7 @@
                         ><v-icon>mdi-shredder</v-icon></v-btn
                       >
                       <v-btn
+                      outlined
                         class="mx-2"
                         fab
                         dark
@@ -376,6 +378,7 @@
 
             <!--    Acopio    -->
             <v-hover
+              style="margin-top: 15px"
               v-slot:default="{ hover }"
               close-delay="200"
               v-if="acopio == true"
@@ -388,15 +391,19 @@
               >
                 <v-card width="350">
                   <v-toolbar color="purple darken-4" dark>
-                    <v-btn color="pink accent-4" icon>
+                    <!-- <v-btn color="pink accent-4" icon>
                       <v-icon> mdi-delete</v-icon>
-                    </v-btn>
-                    <v-label>
-                      <h2 style="margin-left: 90px">Total</h2>
+                    </v-btn> -->
+                    <v-label v-if="ahora == true"
+                      ><h1>*****Ahora*****</h1>
+                    </v-label>
+                    <v-label v-if="cta == true"><h1>Cta Cte</h1> </v-label>
+                    <v-label v-if="acopio == true"
+                      ><h1>*******Acopio******</h1>
                     </v-label>
                   </v-toolbar>
 
-                  <h1>$ {{ monto }}</h1>
+                  <h1>Total $ {{ monto }}</h1>
 
                   <v-spacer></v-spacer>
                   <v-select :items="tiposdepago" v-model="tipopago"></v-select>
@@ -484,8 +491,8 @@ import "vue2-datepicker/index.css";
 export default {
   components: { DatePicker },
   data: () => ({
-    numerodeventa:0,
-    salidapost:'',
+    numerodeventa: 0,
+    salidapost: "",
     auxtipoventa: "",
     auxfecharetiro: "",
     time1: null,
@@ -507,18 +514,23 @@ export default {
     cta: false,
     acopio: false,
     singleSelect: false,
+    timeout: 2000,
     selected: [],
+    snackbar: false,
     value: null,
     customer: [],
     fin: 0,
     efectivo: "",
     monto: 0,
     cont: 0,
+    moneda: [],
+    montomoneda: 0,
     identificador: null,
     isLoading: false,
     items: [],
     clientes: [],
     presupuesto: false,
+    text: `Hello, I'm a snackbar`,
     strarticulos: "",
     productos: [],
     editedItem: [],
@@ -581,6 +593,16 @@ export default {
   },
 
   methods: {
+    agregatipopago() {
+      this.moneda.push({
+        tipopago: this.tipopago,
+        cantidad: this.montomoneda,
+      });
+
+      this.moneda.forEach((element) => {
+        console.log(element);
+      });
+    },
     recargaarticulos() {
       fetch("http://jorgeperalta-001-site6.itempurl.com/articulos.php")
         .then((res) => res.clone().json())
@@ -624,24 +646,27 @@ export default {
           "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
           requestOptions
         )
-        .then((response) => response.json())
-       // .then((result) => console.log(result))
-        .then((result) => (this.salidapost= result),confirm("La venta se almaceno con exito!!"))
-        .catch((error) => console.log("error", error));
-          // .then(function (response) {
-          //   if (response.ok) {
-          //     //  console.log(  response.text());
-          //     confirm("La venta se almaceno con exito!!");
-          //   } else {
-          //     console.log("Respuesta de red OK pero respuesta HTTP no OK");
-          //   }
-          // })
+          .then((response) => response.json())
+          // .then((result) => console.log(result))
+          .then(
+            (result) => (this.salidapost = result),
+            confirm("La venta se almaceno con exito!!")
+          )
+          .catch((error) => console.log("error", error));
+        // .then(function (response) {
+        //   if (response.ok) {
+        //     //  console.log(  response.text());
+        //     confirm("La venta se almaceno con exito!!");
+        //   } else {
+        //     console.log("Respuesta de red OK pero respuesta HTTP no OK");
+        //   }
+        // })
 
-          // .catch(function (error) {
-          //   confirm(
-          //     "Hubo un problema con la red, intente nuevamente:" + error.message
-          //   );
-          // });
+        // .catch(function (error) {
+        //   confirm(
+        //     "Hubo un problema con la red, intente nuevamente:" + error.message
+        //   );
+        // });
       } else {
         confirm("No cuenta con ninguna venta");
       }
@@ -699,7 +724,7 @@ export default {
         .catch((error) => console.log("error", error));
     },
     print() {
-      console.log(this.salidapost)
+      console.log(this.salidapost);
       //this.numerodeventa=this.salidapost.idventa;
       var horaA = new Date().toISOString().substr(0, 10);
       var arrayFeha = horaA.split(["-"]);
