@@ -35,7 +35,7 @@
             :items="tiposdepago"
             v-model="tipopago"
             outlined
-            multiple
+           
           ></v-select>
         </v-col>
         <v-col md="3" style="margin-top: 30px">
@@ -89,11 +89,20 @@
                 {{ art }} <br />
               </v-label>
             </div>
-            <div style="margin-left: 50px">
+             <div style="margin-left: 50px">
               <v-label>Tipo de Pago: {{ detalle.tipopago }} <br /> </v-label>
             </div>
+             <div style="margin-left: 50px">
+              <v-label>Forma/s de pago <br /> </v-label>
+            </div>
             <div style="margin-left: 50px">
-              <v-label>Total: {{ detalle.monto }} <br /> </v-label>
+              <v-label v-for="mixto in datosm" :key="mixto">
+                {{ mixto.tipo }}  {{mixto.pesos}} <br />
+              </v-label>
+            </div>
+            <br>
+            <div style="margin-left: 50px">
+              <v-label>Total: $ <b> {{ detalle.monto }} </b> <br /> </v-label>
             </div>
             <br />
              <div style="margin-left: 50px" v-if="detalle.tipoventa=='Acopio'">
@@ -113,6 +122,8 @@ export default {
   components: { DatePicker },
   data() {
     return {
+      datosmixtos:[],
+      datosm:[],
       detalle: [],
       tipopago: null,
       dialog: false,
@@ -122,7 +133,7 @@ export default {
       value: null,
       ventas: [],
       totalventa: 0,
-      tiposdepago: ["Contado", "Targeta", "Cheque", "Cta. DNI", "Mercado Pago", "Transferencia", "Debe"],
+      tiposdepago: ["Simple", "Mixto"],
       headers: [
         {
           text: "Apellido y nombre",
@@ -144,8 +155,29 @@ export default {
   created() {
     this.cargaclientes();
     this.cargaventas();
+    this.cargamixtos()
   },
   methods: {
+    cargamixtos(){
+       async function asyncData() {
+        const response = await fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/mixto.php"
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        this.datosmixtos = data;
+
+        console.log(this.datosmixtos
+        );
+      });
+    },
+
     actualizaestado(pk){
       alert(pk)
           var formdata = new FormData();
@@ -198,6 +230,15 @@ export default {
       
     },
     amplia(arts) {
+      this.datosm=[];
+      console.log(arts.id)
+      this.datosmixtos.forEach((element) =>{
+       
+          if(parseInt( arts.id) == parseInt( element.fkventa)){
+        this.datosm.push(element) 
+      }
+      })
+      
       this.detalle = arts;
       var aux = this.detalle.strarticulos;
       this.strarts = aux.split(["-"]);

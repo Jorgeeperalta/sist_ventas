@@ -9,7 +9,14 @@
       >
         {{ tipopago }} {{ montomoneda }}
       </v-snackbar>
-
+        <v-snackbar
+        style="margin-top: 20px"
+        v-model="snackbar2"
+        :timeout="timeout"
+        color="green"
+      >
+        Venta almacenada con exito!!
+      </v-snackbar>
       <br />
       <v-label><h1 style="margin-left: 10px">Ventas</h1></v-label>
 
@@ -62,7 +69,7 @@
               outlined
               color="green"
               @click="(presupuesto = false), (ahora = true), (acopio = false)"
-              >Ahora</v-btn
+              >Retira Ahora</v-btn
             >
           </v-col>
           <v-col md="">
@@ -204,22 +211,41 @@
                   </v-toolbar>
 
                   <h1>Total $ {{ monto }}</h1>
-
+                  <v-radio-group v-model="opcion">
+                    <v-row>
+                      <v-col md="6">
+                        <v-radio
+                          style="margin-left: 20px"
+                          value="Simple"
+                          label="Simple"
+                        ></v-radio>
+                      </v-col>
+                      <v-col md="6">
+                        <v-radio value="Mixto" label="Mixto"></v-radio>
+                      </v-col>
+                    </v-row>
+                  </v-radio-group>
                   <v-spacer></v-spacer>
                   <v-col md="12">
                     <v-select
                       :items="tiposdepago"
                       v-model="tipopago"
                     ></v-select>
-                    <v-text-field
-                      v-model="montomoneda"
-                      :label="tipopago"
-                    ></v-text-field>
-                    <v-btn block color="purple" outlined @click="agregatipopago(), (snackbar = true)"
-                      >Guardar Forma de pago</v-btn
-                    >
+                    <div v-if="opcion == 'Mixto'">
+                      <v-text-field
+                        v-model="montomoneda"
+                        :label="tipopago"
+                      ></v-text-field>
+                      <v-btn
+                        block
+                        color="purple"
+                        outlined
+                        @click="agregatipopago(), (snackbar = true)"
+                        >Guardar Forma de pago</v-btn
+                      >
+                    </div>
                   </v-col>
-                  <div v-if="tipopago == 'Contado'">
+                  <div v-if="tipopago == 'Efectivo'">
                     <v-container>
                       <v-row justify="center">
                         <v-col md="6" sm="6" xl="6">
@@ -240,7 +266,7 @@
                   <v-row>
                     <v-col md="12">
                       <v-btn
-                      outlined
+                        outlined
                         class="mx-2"
                         fab
                         dark
@@ -260,7 +286,7 @@
                         ><v-icon>mdi-currency-usd</v-icon></v-btn
                       > -->
                       <v-btn
-                      outlined
+                        outlined
                         class="mx-2"
                         fab
                         dark
@@ -270,7 +296,7 @@
                         ><v-icon>mdi-shredder</v-icon></v-btn
                       >
                       <v-btn
-                      outlined
+                        outlined
                         class="mx-2"
                         fab
                         dark
@@ -491,13 +517,14 @@ import "vue2-datepicker/index.css";
 export default {
   components: { DatePicker },
   data: () => ({
+    opcion: "Simple",
     numerodeventa: 0,
     salidapost: "",
     auxtipoventa: "",
     auxfecharetiro: "",
     time1: null,
     tiposdepago: [
-      "Contado",
+      "Efectivo",
       "Targeta",
       "Cheque",
       "Cta. DNI",
@@ -516,7 +543,8 @@ export default {
     singleSelect: false,
     timeout: 2000,
     selected: [],
-    snackbar: false,
+     snackbar: false,
+    snackbar2: false,
     value: null,
     customer: [],
     fin: 0,
@@ -598,10 +626,65 @@ export default {
         tipopago: this.tipopago,
         cantidad: this.montomoneda,
       });
+    },
+    guardaopcion() {
+      
+    //  console.log(this.salidapost.idventa);
+      if (this.opcion == "Mixto") {
+        this.moneda.forEach((element) => {
+          var formdata = new FormData();
 
-      this.moneda.forEach((element) => {
-        console.log(element);
-      });
+          formdata.append("id", "");
+          formdata.append("tipo", element.tipopago);
+          formdata.append("pesos", element.cantidad);
+          formdata.append("fkventa", this.salidapost.idventa);
+
+          var requestOptions = {
+            method: "POST",
+            body: formdata,
+            redirect: "follow",
+          };
+
+          fetch(
+            "http://jorgeperalta-001-site6.itempurl.com/mixto.php",
+            requestOptions
+          )
+            .then((response) => response.json())
+            // .then((result) => console.log(result))
+            .then(
+              (result) => console.log(result)
+              //  confirm("La venta se almaceno con exito!!")
+            )
+            .catch((error) => console.log("error", error));
+        });
+      }else{
+
+        var auxtipopago= this.tipopago
+         var formdata = new FormData();
+
+          formdata.append("id", "");
+          formdata.append("tipo", auxtipopago);
+          formdata.append("pesos", this.monto);
+          formdata.append("fkventa", this.salidapost.idventa);
+
+          var requestOptions = {
+            method: "POST",
+            body: formdata,
+            redirect: "follow",
+          };
+
+          fetch(
+            "http://jorgeperalta-001-site6.itempurl.com/mixto.php",
+            requestOptions
+          )
+            .then((response) => response.json())
+            // .then((result) => console.log(result))
+            .then(
+              (result) => console.log(result)
+              //  confirm("La venta se almaceno con exito!!")
+            )
+            .catch((error) => console.log("error", error));
+      }
     },
     recargaarticulos() {
       fetch("http://jorgeperalta-001-site6.itempurl.com/articulos.php")
@@ -631,42 +714,31 @@ export default {
         formdata.append("fkcliente", this.customer.id);
         formdata.append("fecha", new Date().toISOString().substr(0, 10));
         formdata.append("monto", this.monto);
-        formdata.append("tipopago", this.tipopago);
+        formdata.append("tipopago", this.opcion);
         formdata.append("strarticulos", this.strarticulos);
         formdata.append("tipoventa", this.auxtipoventa);
         formdata.append("fecharetiro", this.auxfecharetiro);
         formdata.append("fechasalida", this.auxfecharetiro);
-        var requestOptions = {
-          method: "POST",
-          body: formdata,
-          redirect: "follow",
-        };
 
-        fetch(
-          "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
-          requestOptions
-        )
-          .then((response) => response.json())
-          // .then((result) => console.log(result))
-          .then(
-            (result) => (this.salidapost = result),
-            confirm("La venta se almaceno con exito!!")
-          )
-          .catch((error) => console.log("error", error));
-        // .then(function (response) {
-        //   if (response.ok) {
-        //     //  console.log(  response.text());
-        //     confirm("La venta se almaceno con exito!!");
-        //   } else {
-        //     console.log("Respuesta de red OK pero respuesta HTTP no OK");
-        //   }
-        // })
+        async function asyncData() {
+          const response = await fetch(
+            "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
+            { method: "POST", body: formdata }
+          );
+          const data = await response.json();
 
-        // .catch(function (error) {
-        //   confirm(
-        //     "Hubo un problema con la red, intente nuevamente:" + error.message
-        //   );
-        // });
+          return data;
+        }
+
+        const result = asyncData();
+
+        result.then((data) => {
+          this.salidapost = data;
+
+         // console.log(this.salidapost);
+          this.guardaopcion();
+          this.snackbar2=true
+        });
       } else {
         confirm("No cuenta con ninguna venta");
       }
@@ -674,7 +746,6 @@ export default {
     },
     restastock() {
       this.productos.forEach((element) => {
-        console.log(element);
         var formdata = new FormData();
 
         formdata.append("id", element.pk);
