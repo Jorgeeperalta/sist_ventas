@@ -45,6 +45,7 @@
           <proveedores v-if="provee == true && variable == 1"></proveedores>
           <clientes v-if="clie == true && variable == 1"></clientes>
           <informe v-if="info == true && variable == 1"></informe>
+           <deudores v-if="deu == true && variable == 1"></deudores>
         </di>
       </v-content>
 
@@ -72,6 +73,7 @@
         <v-btn block @click="elije_informe()">Informe<v-icon></v-icon></v-btn>
         <v-btn block @click="elije_clientes()">Clientes<v-icon></v-icon></v-btn>
         <v-btn block @click="elije_ventas()">Ventas<v-icon></v-icon></v-btn>
+          <v-btn block @click="elije_deudores()">Deudores<v-icon></v-icon></v-btn>
       </v-navigation-drawer>
     </v-sheet>
   </v-app>
@@ -86,6 +88,7 @@ import catalogo from "@/components/Catalogo.vue";
 import proveedores from "@/components/proveedores.vue";
 import clientes from "@/components/Clientes.vue";
 import informe from "@/components/Informe.vue";
+import deudores from "@/components/Deudores.vue";
 export default {
   name: "App",
 
@@ -98,6 +101,7 @@ export default {
     proveedores,
     clientes,
     informe,
+    deudores
   },
 
   data: () => ({
@@ -109,6 +113,7 @@ export default {
     cate: false,
     variable: 2,
     estado: false,
+    deu:false,
 
     drawer: null,
     items: [
@@ -124,6 +129,7 @@ export default {
       this.provee = false;
       this.info = true;
       this.clie = false;
+      this.deu= false;
     },
     elije_proveedores() {
       this.art = false;
@@ -132,6 +138,7 @@ export default {
       this.provee = true;
       this.info = false;
       this.clie = false;
+      this.deu= false;
     },
     elije_articulos() {
       this.art = true;
@@ -140,6 +147,7 @@ export default {
       this.provee = false;
       this.info = false;
       this.clie = false;
+      this.deu= false;
     },
     elije_ventas() {
       this.vent = true;
@@ -148,6 +156,7 @@ export default {
       this.provee = false;
       this.info = false;
       this.clie = false;
+      this.deu= false;
     },
     elije_categorias() {
       this.vent = false;
@@ -156,6 +165,7 @@ export default {
       this.provee = false;
       this.info = false;
       this.clie = false;
+      this.deu= false;
     },
     elije_clientes() {
       this.vent = false;
@@ -164,6 +174,16 @@ export default {
       this.provee = false;
       this.clie = true;
       this.info = false;
+      this.deu= false;
+    },
+     elije_deudores() {
+      this.vent = false;
+      this.art = false;
+      this.cate = false;
+      this.provee = false;
+      this.clie = false;
+      this.info = false;
+      this.deu= true;
     },
   },
 };

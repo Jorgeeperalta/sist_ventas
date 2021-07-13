@@ -213,15 +213,18 @@
                   <h1>Total $ {{ monto }}</h1>
                   <v-radio-group v-model="opcion">
                     <v-row>
-                      <v-col md="6">
+                      <v-col md="4">
                         <v-radio
                           style="margin-left: 20px"
                           value="Simple"
                           label="Simple"
                         ></v-radio>
                       </v-col>
-                      <v-col md="6">
+                      <v-col md="4">
                         <v-radio value="Mixto" label="Mixto"></v-radio>
+                      </v-col>
+                       <v-col md="4">
+                        <v-radio value="Debe" label="Debe"></v-radio>
                       </v-col>
                     </v-row>
                   </v-radio-group>
@@ -530,7 +533,7 @@ export default {
       "Cta. DNI",
       "Mercado Pago",
       "Transferencia",
-      "Debe",
+     
     ],
     tipopago: null,
     totalcta: null,
