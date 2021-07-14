@@ -96,15 +96,20 @@
                 {{ art }} <br />
               </v-label>
             </div>
-            <div style="margin-left: 50px">
-              <v-label>Tipo de Pago: {{ detalle.tipopago }} <br /> </v-label>
-            </div>
-            <div style="margin-left: 50px">
+            <!-- <div style="margin-left: 50px">
+              <v-label> Deuda Inicial <br /> </v-label>
+            </div> -->
+            <!-- <div style="margin-left: 50px">
               <v-label>Forma/s de pago <br /> </v-label>
-            </div>
+            </div> -->
             <div style="margin-left: 50px">
               <v-label v-for="mixto in datosm" :key="mixto">
-                {{ mixto.tipo }} {{ mixto.pesos }} <br />
+               Deuda Inicial $  {{ mixto.pesos }} <br />
+              </v-label>
+            </div>
+             <div style="margin-left: 50px">
+              <v-label v-for="mixto in datodeuda" :key="mixto">
+               $ {{ mixto.pago }} _________   Fecha {{mixto.fecha}} <br />
               </v-label>
             </div>
             <br />
@@ -124,15 +129,20 @@
                   outlined
                 ></v-text-field>
               </v-col>
-              <v-col md="8"
+              <!-- <v-col md="8"
                 ><v-text-field
                   style="margin-left: -15px"
                   v-model="detalledeuda"
                   label="Detalle"
                   outlined
                 ></v-text-field>
-              </v-col>
-              <br /><v-btn @click="actualizardeuda(detalle.id)">Guradar</v-btn>
+              </v-col> -->
+              <v-btn color="green" outlined @click="actualizardeuda(detalle.id)"
+                >Guradar</v-btn
+              >
+                <v-btn color="red"   style="margin-left: 220px" outlined @click="cierra()"
+                >Cerrar</v-btn
+              >
             </div>
             <br />
             <div style="margin-left: 50px" v-if="detalle.tipoventa == 'Acopio'">
@@ -153,11 +163,12 @@ export default {
   components: { DatePicker },
   data() {
     return {
+      datodeuda:[],
       detalledeuda: "",
       montodeuda: 0,
       datosmixtos: [],
       datosm: [],
-      datosdeudores:[],
+      datosdeudores: [],
       detalle: [],
       tipopago: null,
       dialog: false,
@@ -176,7 +187,7 @@ export default {
           value: "apellido",
         },
         { text: "Fecha", value: "fecha" },
-        { text: "Monto", value: "monto" },
+        { text: "Monto Adeudado", value: "monto" },
         { text: "Tipo de pago", value: "tipopago" },
         { text: "Estado", value: "tipoventa" },
         { text: "Acciones", value: "actions", sortable: false },
@@ -193,8 +204,8 @@ export default {
     this.traedeudores();
   },
   methods: {
-      traedeudores(){
-          async function asyncData() {
+    traedeudores() {
+      async function asyncData() {
         const response = await fetch(
           "http://jorgeperalta-001-site6.itempurl.com/actualizardeuda.php"
         );
@@ -210,9 +221,9 @@ export default {
 
         console.log(this.datosdeudores);
       });
-      },
+    },
     actualizardeuda(fk) {
-      alert(this.montodeuda + "" + fk);
+      // alert(this.montodeuda + "" + fk);
       var formdata = new FormData();
 
       formdata.append("id", "");
@@ -235,7 +246,37 @@ export default {
 
       result.then((data) => {
         console.log(data);
+        this.actualizarventa(fk, this.montodeuda);
       });
+    },
+    actualizarventa(id, montod) {
+      async function asyncData() {
+        const response = await fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/actualizardeuda.php?id=" +
+            id +
+            "&monto=" +
+            montod,
+          { method: "PUT" }
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        console.log(data);
+        alert('Almacenado con exito!!');
+        this.cargaventas();
+        this.dialog=false;
+       
+
+      });
+    },
+    cierra(){
+       this.dialog=false;
+        this.datodeuda=[];
     },
     cargamixtos() {
       async function asyncData() {
@@ -305,6 +346,12 @@ export default {
       }
     },
     amplia(arts) {
+      this.datosdeudores.forEach(element=>{
+        if(element.fkventa==arts.id) {
+          this.datodeuda.push(element)
+        }
+      })
+     
       this.datosm = [];
       console.log(arts.id);
       this.datosmixtos.forEach((element) => {
@@ -326,6 +373,7 @@ export default {
       this.totalventa = 0;
       this.aux = [];
       this.tipopago = null;
+      this.datodeuda=[];
     },
     filtar() {
       if (this.value != null && this.time1 != null && this.tipopago != null) {
