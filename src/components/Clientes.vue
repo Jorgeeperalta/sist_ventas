@@ -28,7 +28,7 @@
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on }">
               <v-btn color="primary" dark class="mb-2" v-on="on"
-                >Nuevo Item</v-btn
+                >Nuevo Cliente</v-btn
               >
             </template>
             <v-card>
@@ -39,19 +39,19 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="4" md="4">
+                    <v-col cols="12" sm="4" md="6">
                       <v-text-field
                         v-model="editedItem.apellido"
-                        label="Apellido"
+                        label="Apellido y Nombre"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="4" md="4"  v-if="nomb==true">
+                    <v-col cols="12" sm="4" md="6"  v-if="nomb==true">
                       <v-text-field
                         v-model="editedItem.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="4" md="4">
+                    <v-col cols="12" sm="4" md="6">
                       <v-text-field
                         v-model="editedItem.telefono"
                         label="Telefono"
@@ -171,7 +171,7 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Nuevo Item" : "Edita Item";
+      return this.editedIndex === -1 ? "Nuevo Cliente" : "Edita Cliente";
     },
   },
 
@@ -271,6 +271,7 @@ export default {
           requestOptions
         )
           .then((response) => response.text())
+          .then((result) => alert('Se edito con exito!!'))
           .then((result) => console.log(result));
         this.initialize();
         //  Object.assign(this.desserts[this.editedIndex], this.editedItem);
@@ -296,8 +297,10 @@ export default {
           requestOptions
         )
           .then((response) => response.text())
+          .then((result) => alert('Se almaceno con exito!!'))
           .then((result) => console.log(result));
         // this.desserts.push(this.editedItem);
+
       }
       this.initialize();
       this.close();

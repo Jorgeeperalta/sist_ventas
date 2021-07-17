@@ -67,8 +67,8 @@
 
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark class="mb-2" v-on="on"
-                >Nuevo Item</v-btn
+              <v-btn outlined color="primary" dark class="mb-2" v-on="on"
+                >Nuevo Proveedor</v-btn
               >
             </template>
             <v-card>
@@ -337,7 +337,7 @@ export default {
           requestOptions
         )
           .then((response) => response.text())
-          .then((result) => console.log(result));
+          .then((result) => alert ('Se edito ccon exito!!'));
         this.initialize();
         //  Object.assign(this.desserts[this.editedIndex], this.editedItem);
       } else {
@@ -360,9 +360,11 @@ export default {
           requestOptions
         )
           .then((response) => response.text())
-          .then((result) => console.log(result));
+          .then((result) => console.log(result))
+           .then((result) => alert('Se Almaceno con exiito!!'));
         // this.desserts.push(this.editedItem);
         this.initialize();
+       
       }
       this.close();
     },

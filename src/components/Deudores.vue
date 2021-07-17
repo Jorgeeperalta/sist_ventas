@@ -10,6 +10,13 @@
         </h3></v-label
       >
       <v-row>
+        <v-col md="3" style="margin-top: 30px">
+          <v-text-field
+            label="Ingrese numero de remito"
+            v-model="numeroremito"
+            outlined
+          ></v-text-field>
+        </v-col>
         <v-col md="3">
           <v-autocomplete
             style="margin-left: 10px; margin-top: 30px"
@@ -29,14 +36,7 @@
             valueType="format"
           ></date-picker
         ></v-col>
-        <v-col md="3" style="margin-top: 30px">
-          <v-select
-            label="Tipo de Pago"
-            :items="tiposdepago"
-            v-model="tipopago"
-            outlined
-          ></v-select>
-        </v-col>
+
         <v-col md="3" style="margin-top: 30px">
           <v-btn color="green" @click="filtar()" outlined>Buscar</v-btn>
           <v-btn
@@ -60,7 +60,7 @@
       >
         <template v-slot:[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="amplia(item)"> mdi-pencil </v-icon>
-          <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+          <!-- <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon> -->
         </template>
       </v-data-table>
       <v-dialog v-model="dialog" width="500px">
@@ -104,12 +104,12 @@
             </div> -->
             <div style="margin-left: 50px">
               <v-label v-for="mixto in datosm" :key="mixto">
-               Deuda Inicial $  {{ mixto.pesos }} <br />
+                Deuda Inicial $ {{ mixto.pesos }} <br />
               </v-label>
             </div>
-             <div style="margin-left: 50px">
+            <div style="margin-left: 50px">
               <v-label v-for="mixto in datodeuda" :key="mixto">
-               $ {{ mixto.pago }} _________   Fecha {{mixto.fecha}} <br />
+                $ {{ mixto.pago }} _________ Fecha {{ mixto.fecha }} <br />
               </v-label>
             </div>
             <br />
@@ -140,12 +140,27 @@
               <v-btn color="green" outlined @click="actualizardeuda(detalle.id)"
                 >Guradar</v-btn
               >
-                <v-btn color="red"   style="margin-left: 220px" outlined @click="cierra()"
+              <v-btn
+                color="red"
+                style="margin-left: 220px"
+                outlined
+                @click="cierra()"
                 >Cerrar</v-btn
               >
             </div>
             <br />
             <div style="margin-left: 50px" v-if="detalle.tipoventa == 'Acopio'">
+              <v-textarea
+                outlined
+                color="green"
+                v-model="detalleacopio"
+              ></v-textarea>
+              <v-btn
+                outlined
+                color="green"
+                @click="actualizaestadoacopio(detalle.id)"
+                >Guardar</v-btn
+              >
               <v-btn outlined color="red" @click="actualizaestado(detalle.id)"
                 >Retirado</v-btn
               >
@@ -163,7 +178,8 @@ export default {
   components: { DatePicker },
   data() {
     return {
-      datodeuda:[],
+      numeroremito: 0,
+      datodeuda: [],
       detalledeuda: "",
       montodeuda: 0,
       datosmixtos: [],
@@ -175,11 +191,13 @@ export default {
       time1: null,
       aux: [],
       clientes: [],
+      detalleacopio: "",
       value: null,
       ventas: [],
       totalventa: 0,
       tiposdepago: ["Simple", "Mixto"],
       headers: [
+        { text: "ID", value: "id" },
         {
           text: "Apellido y nombre",
           align: "start",
@@ -222,6 +240,32 @@ export default {
         console.log(this.datosdeudores);
       });
     },
+    actualizaestadoacopio(fk) {
+      // alert(this.montodeuda + "" + fk);
+      var formdata = new FormData();
+
+      formdata.append("id", "");
+
+      formdata.append("detalle", this.detalleacopio);
+      formdata.append("fkventa", fk);
+      formdata.append("fecha", new Date().toISOString().substr(0, 10));
+
+      async function asyncData() {
+        const response = await fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/detalleacopio.php",
+          { method: "POST", body: formdata }
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        console.log(data);
+      });
+    },
     actualizardeuda(fk) {
       // alert(this.montodeuda + "" + fk);
       var formdata = new FormData();
@@ -248,6 +292,7 @@ export default {
         console.log(data);
         this.actualizarventa(fk, this.montodeuda);
       });
+      this.cargaventas();
     },
     actualizarventa(id, montod) {
       async function asyncData() {
@@ -267,16 +312,18 @@ export default {
 
       result.then((data) => {
         console.log(data);
-        alert('Almacenado con exito!!');
+        alert("Almacenado con exito!!");
         this.cargaventas();
-        this.dialog=false;
-       
-
+        this.dialog = false;
       });
+      this.traedeudores();
+      this.cargaventas();
     },
-    cierra(){
-       this.dialog=false;
-        this.datodeuda=[];
+    cierra() {
+      this.dialog = false;
+      this.datodeuda = [];
+      this.traedeudores();
+      this.cargaventas();
     },
     cargamixtos() {
       async function asyncData() {
@@ -320,6 +367,7 @@ export default {
         .then((response) => response.text())
         .then((result) => console.log(result))
         .catch((error) => console.log("error", error));
+      this.traedeudores();
     },
     deleteItem(item) {
       //   console.log(item);
@@ -346,12 +394,12 @@ export default {
       }
     },
     amplia(arts) {
-      this.datosdeudores.forEach(element=>{
-        if(element.fkventa==arts.id) {
-          this.datodeuda.push(element)
+      this.datosdeudores.forEach((element) => {
+        if (element.fkventa == arts.id) {
+          this.datodeuda.push(element);
         }
-      })
-     
+      });
+
       this.datosm = [];
       console.log(arts.id);
       this.datosmixtos.forEach((element) => {
@@ -367,13 +415,15 @@ export default {
       this.dialog = true;
     },
     limpiar() {
+      this.montodeuda = 0;
       this.tableventas = [];
       this.time1 = null;
       this.value = null;
       this.totalventa = 0;
       this.aux = [];
       this.tipopago = null;
-      this.datodeuda=[];
+      this.datodeuda = [];
+      this.traedeudores();
     },
     filtar() {
       if (this.value != null && this.time1 != null && this.tipopago != null) {
@@ -389,11 +439,11 @@ export default {
             this.totalventa += parseInt(element.monto);
           }
         });
-      } else if (this.time1 != null && this.tipopago != null) {
+      } else if (this.time1 != null && this.value != null) {
         this.ventas.forEach((element) => {
           if (
             this.time1 == element.fecha &&
-            this.tipopago == element.tipopago &&
+            this.value == element.apellido &&
             element.tipopago == "Debe"
           ) {
             this.aux.push(element);
@@ -414,9 +464,9 @@ export default {
             this.totalventa += parseInt(element.monto);
           }
         });
-      } else if (this.tipopago != null) {
+      } else if (this.numeroremito != null) {
         this.ventas.forEach((element) => {
-          if (this.tipopago == element.tipopago && element.tipopago == "Debe") {
+          if (this.numeroremito == element.id && element.tipopago == "Debe") {
             this.aux.push(element);
             this.totalventa += parseInt(element.monto);
           }

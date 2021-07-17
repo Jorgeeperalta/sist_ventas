@@ -300,6 +300,7 @@ export default {
       )
         .then((response) => response.text())
         .then((result) => console.log(result))
+        .then((result) => console.log('Se actualizo con exito!!'))
         .catch((error) => console.log("error", error));
 
       this.cargar_datos();
@@ -338,7 +339,7 @@ export default {
 
       result.then((data) => {
         this.desserts = data;
-        // console.log(data);
+         console.log(data);
       });
     },
 
@@ -400,9 +401,11 @@ export default {
       )
         .then((response) => response.text())
         .then((result) => console.log(result))
+        .then((result) => alert('Se actulizo de exito!!'))
         .catch((error) => console.log("error", error));
 
       this.cargar_datos();
+      this.dialogstock=false
     },
     actualizastock(item) {
       this.unidadstock = item;
@@ -439,6 +442,8 @@ export default {
           requestOptions
         )
           .then((response) => response.text())
+           .then((result) => alert('Se edito con exito!!'))
+
           .then((result) => console.log(result));
 
         this.cargar_datos();
@@ -467,7 +472,8 @@ export default {
           requestOptions
         )
           .then((response) => response.text())
-          .then((result) => console.log(result));
+          .then((result) => console.log(result))
+           .then((result) => alert('Se almaceno con exito!!'));
 
         this.cargar_datos();
 

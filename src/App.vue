@@ -38,15 +38,15 @@
         </v-row>
 
         <login @estado_login="variable = $event" v-if="variable == 2"></login>
-        <di v-if="variable == 0 || 1">
+        <div v-if="variable == 0 || 1">
           <ventas v-if="vent == true"></ventas>
           <articulos v-if="art == true && variable == 1"></articulos>
           <catalogo v-if="cate == true && variable == 1"></catalogo>
           <proveedores v-if="provee == true && variable == 1"></proveedores>
           <clientes v-if="clie == true && variable == 1"></clientes>
           <informe v-if="info == true && variable == 1"></informe>
-           <deudores v-if="deu == true && variable == 1"></deudores>
-        </di>
+           <deudores v-if="deu == true "></deudores>
+        </div>
       </v-content>
 
       <v-navigation-drawer v-model="drawer" absolute temporary>
