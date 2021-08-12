@@ -543,7 +543,7 @@
           </v-col>
         </v-row>
 
-        <v-btn @click="mu()"> muestra</v-btn>
+        <!-- <v-btn @click="mu()"> muestra</v-btn> -->
       </v-container>
     </template>
   </v-app>

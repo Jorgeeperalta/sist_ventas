@@ -304,6 +304,7 @@ export default {
         .catch((error) => console.log("error", error));
 
       this.cargar_datos();
+      alert('Se actualizo con exito!!')
     },
     autocompleta() {
       var cont = 0;
