@@ -60,7 +60,7 @@
       >
         <template v-slot:[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="amplia(item)"> mdi-pencil </v-icon>
-          <!-- <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon> -->
+          <v-icon small @click="actualizamontotal(item)"> mdi-plus </v-icon>
         </template>
       </v-data-table>
       <v-dialog v-model="dialog" width="500px">
@@ -169,6 +169,26 @@
         </v-card>
       </v-dialog>
     </v-card>
+     <v-dialog v-model="dialogactualizamonto" max-width="600px">
+            <v-card>
+              <v-card-title>
+                <span class="headline">Actualiza monto de  {{nombredeudor}}</span>
+              </v-card-title>
+
+              <v-card-text>
+                <v-textarea
+                  outlined
+                  v-model="porcentaje"
+                  label="Ingrese porcentaje"
+                ></v-textarea>
+                <v-btn outlined color="green" @click="guardaporcentaje()"
+                  >Guardar</v-btn
+                >
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+
+
   </v-app>
 </template>
 <script>
@@ -178,6 +198,9 @@ export default {
   components: { DatePicker },
   data() {
     return {
+      porcentaje:0,
+      nombredeudor:'',
+      dialogactualizamonto:false,
       numeroremito: 0,
       datodeuda: [],
       detalledeuda: "",
@@ -210,6 +233,7 @@ export default {
         { text: "Estado", value: "tipoventa" },
         { text: "Acciones", value: "actions", sortable: false },
       ],
+      datosdeudor:null,
       ventas: [],
       tableventas: [],
       strarts: [],
@@ -222,6 +246,45 @@ export default {
     this.traedeudores();
   },
   methods: {
+    guardaporcentaje(){
+       
+       console.log(this.datosdeudor.id)
+        // alert(this.montodeuda + "" + fk);
+        var porc= (this.porcentaje / 100) + 1
+        var identificador= this.datosdeudor.id
+
+      async function asyncData() {
+         const response = await fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/porcentajedeuda.php?id=" +
+            identificador+
+            "&porcentaje=" +
+            porc,
+          { method: "PUT" }
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        console.log(data);
+        alert('Se actualizo con exito!!')
+
+        this.dialogactualizamonto=false;
+      
+      });
+    
+
+
+
+    },
+    actualizamontotal(deudor){
+         this.dialogactualizamonto=true
+         this.datosdeudor=deudor;
+          this.nombredeudor=this.datosdeudor.apellido
+    },
     traedeudores() {
       async function asyncData() {
         const response = await fetch(

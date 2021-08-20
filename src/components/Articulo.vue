@@ -345,9 +345,11 @@ export default {
     },
 
     filterOnlyCapsText(value, search, item) {
+      console.log(item)
       return (
         value != null &&
         search != null &&
+        search == item.id &&
         typeof value === "string" &&
         value.toString().toLocaleUpperCase().indexOf(search) !== -1
       );
