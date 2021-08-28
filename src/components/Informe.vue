@@ -13,7 +13,6 @@
         <v-col md="3" style="margin-top: 30px">
           <v-text-field
             label="Ingrese numero de remito"
-            
             v-model="numeroremito"
             outlined
           ></v-text-field>
@@ -37,7 +36,7 @@
             valueType="format"
           ></date-picker
         ></v-col>
-        
+
         <v-col md="3" style="margin-top: 30px">
           <v-btn color="green" @click="filtar()" outlined>Buscar</v-btn>
           <v-btn
@@ -125,13 +124,70 @@
             </div>
             <br />
             <div style="margin-left: 50px" v-if="detalle.tipoventa == 'Acopio'">
-              <v-icon @click="dialogacopio=true" color="red">mdi-search-web</v-icon>
-              <v-col md="10"><v-textarea outlined color="green" label="Detalle" v-model="detalleacopio" ></v-textarea></v-col>
-              
-              <v-btn style="margin-left: 10px" outlined color="green" @click="actualizaestadoacopio(detalle.id)"
+              <v-icon
+                @click="(dialogacopio = true), filtradetalle(detalle.id)"
+                color="red"
+                >mdi-search-web</v-icon
+              >
+              <v-row>
+                <v-col md="4"
+                  ><v-text-field
+                    outlined
+                    type="number"
+                    color="green"
+                    label="Id articulo"
+                    v-model="detalleacopio"
+                  ></v-text-field
+                ></v-col>
+                <v-col md="4"
+                  ><v-text-field
+                    type="number"
+                    outlined
+                    color="green"
+                    label="Cantidad"
+                    v-model="cantidad"
+                  ></v-text-field
+                ></v-col>
+                <v-col md="4">
+                  <v-btn
+                    style="margin-left: 10px"
+                    outlined
+                    color="green"
+                    @click="agregaitems(detalle.id, detalleacopio, cantidad)"
+                    >+</v-btn
+                  >
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-list>
+                  <v-list-item
+                    v-for="(array, index) in arrayarticulos"
+                    :key="index"
+                  >
+                    {{ array.cantidad }} {{ array.nombre }}
+                    <v-btn
+                      style="margin-left: 200px"
+                      outlined
+                      @click="eliminaitem(array)"
+                      color="red"
+                      >X</v-btn
+                    >
+                  </v-list-item>
+                </v-list>
+              </v-row>
+
+              <v-btn
+                style="margin-left: 10px"
+                outlined
+                color="green"
+                @click="descuentaacopio(detalle.id)"
                 >Guardar</v-btn
               >
-              <v-btn style="margin-left: 200px" outlined color="red" @click="actualizaestado(detalle.id)"
+              <v-btn
+                style="margin-left: 200px"
+                outlined
+                color="red"
+                @click="actualizaestado(detalle.id)"
                 >Retirado</v-btn
               >
             </div>
@@ -140,16 +196,16 @@
       </v-dialog>
       <v-dialog v-model="dialogacopio" width="500px">
         <v-card height="600px">
-
-           <div style="margin-left: 50px">
-              <v-label v-for="art in dtacopio" :key="art">
-                {{ art.detalle }}___ {{art.fecha}}<br />
-              </v-label>
-            </div>
-              
+          <h3 style="margin-left: 30px">Apto para retiro 'A fovor del Cliente'</h3>
+          <br>
+          <div style="margin-left: 50px">
+            <v-label v-for="art in dataacopio" :key="art">
+              <div v-if="art.cantidad > 0">
+                {{ art.cantidad }}___ {{ art.detalle }}___ {{ art.fecha }}<br />
+              </div>
+            </v-label>
+          </div>
         </v-card>
-
-
       </v-dialog>
     </v-card>
   </v-app>
@@ -157,12 +213,15 @@
 <script>
 import DatePicker from "vue2-datepicker";
 import "vue2-datepicker/index.css";
+import imagen from "@/imagen"
 export default {
   components: { DatePicker },
   data() {
     return {
-      dialogacopio:false,
-      detalleacopio:'',
+      dataacopio: [],
+      cantidad: 0,
+      dialogacopio: false,
+      detalleacopio: "",
       Efectivo: 0,
       Targeta: 0,
       Cheque: 0,
@@ -181,7 +240,7 @@ export default {
       ventas: [],
       totalventa: 0,
       numeroremito: 0,
-      dtacopio:[],
+      dtacopio: [],
       tiposdepago: ["Simple", "Mixto"],
       headers: [
         { text: "ID", value: "id" },
@@ -197,44 +256,235 @@ export default {
         { text: "Estado", value: "tipoventa" },
         { text: "Acciones", value: "actions", sortable: false },
       ],
+      articulos: [],
+      arrayarticulos: [],
       ventas: [],
       tableventas: [],
       strarts: [],
     };
   },
+
   created() {
     this.cargaclientes();
     this.cargaventas();
     this.cargamixtos();
-    this.cargadetalleacopio()
+    this.cargadetalleacopio();
+    fetch("http://jorgeperalta-001-site6.itempurl.com/articulos.php")
+      .then((res) => res.clone().json())
+      .then((res) => {
+        this.articulos = res;
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => (this.isLoading = false));
   },
   methods: {
-     actualizaestadoacopio(fk) {
-      // alert(this.montodeuda + "" + fk);
-      var formdata = new FormData();
-
-      formdata.append("id", "");
-      
-      formdata.append("detalle", this.detalleacopio);
-      formdata.append("fkventa", fk);
-      formdata.append("fecha", new Date().toISOString().substr(0, 10));
-
-      async function asyncData() {
-        const response = await fetch(
-          "http://jorgeperalta-001-site6.itempurl.com/detalleacopio.php",
-          { method: "POST", body: formdata }
-        );
-        const data = await response.json();
-
-        return data;
+      print() {
+    //  console.log(this.salidapost);
+      //this.numerodeventa=this.salidapost.idventa;
+      var horaA = new Date().toISOString().substr(0, 10);
+      var arrayFeha = horaA.split(["-"]);
+      let pdfName = "Factura ";
+      var contador = 20;
+      var doc = new jsPDF();
+      doc.setLineWidth(1.5);
+      doc.line(8, 5, 200, 5);
+      var image =imagen;
+      doc.addImage(image, "PNG", 85, 6, 40, 40);
+      doc.line(10, 35, 200, 35);
+      doc.setFontSize(14);
+      doc.text(
+        150,
+        12,
+        "Fecha:  " + arrayFeha[2] + "-" + arrayFeha[1] + "-" + arrayFeha[0]
+      );
+      if (this.presupuesto == true) {
+        doc.setFontSize(14);
+        doc.text(10, 12, "Presupuesto");
+      } else {
+        doc.text(10, 12, "Remito:  " + this.salidapost.idventa);
+      }
+      doc.setFontSize(8);
+      doc.text(150, 30, "Uso interno");
+      doc.setFontSize(13);
+      doc.text(10, 47, "Condicion de IVA : Consumidor Final  ");
+      doc.setFontSize(13);
+      if (this.presupuesto != true) {
+        doc.text(130, 47, "Tipo de Pago:  " + this.opcion);
+      }
+      doc.setFontSize(13);
+      doc.text(10, 57, "Apellido y Nombre:  " + this.customer.apellido);
+      doc.setFontSize(13);
+      doc.text(130, 57, "Domicilio:  " + this.customer.domicilio);
+      doc.setFontSize(13);
+      doc.text(10, 67, "Localidad:  " + this.customer.localidad);
+      doc.setFontSize(13);
+      if (this.presupuesto == true) {
+        doc.text(130, 67, "Presupuesto");
+      } else {
+        doc.text(130, 67, "Retira: " + this.auxtipoventa);
       }
 
-      const result = asyncData();
+      if (this.auxtipoventa == "Acopio") {
+        doc.setFontSize(13);
+        doc.setTextColor("red");
+        doc.text(165, 67, " " + this.auxfecharetiro);
+      }
+      doc.setTextColor(0, 0, 0);
+      doc.setLineWidth(0.8);
+      doc.line(10, 75, 200, 75);
+      doc.setLineWidth(0.6);
+      doc.line(10, 78, 200, 78);
+      doc.setFontSize(9);
+      doc.text(10, 85, "Cantidad ");
+      doc.setLineWidth(0.6);
+      doc.text(30, 85, "Articulo ");
+      doc.setLineWidth(0.6);
+      doc.text(100, 85, "Precio U.");
+      doc.setLineWidth(0.6);
+      doc.text(170, 85, "Sub Total ");
 
-      result.then((data) => {
-        console.log(data);
-        this.dialog= false
-       
+      doc.setLineWidth(0.6);
+      doc.line(10, 88, 200, 88);
+
+      var contador = 95;
+
+      this.productos.forEach((element) => {
+        console.log(element);
+        //    doc.setFontSize(9);
+        doc.text(10, contador, "  " + element.cantidad);
+        doc.setLineWidth(0.6);
+        doc.text(30, contador, " " + element.nombre);
+        doc.setLineWidth(0.6);
+        if (this.auxtipoventa == "cta cte") {
+          doc.text(100, contador, "");
+          doc.setLineWidth(0.6);
+          doc.text(170, contador, "");
+        } else {
+          doc.text(100, contador, "" + element.precio);
+          doc.setLineWidth(0.6);
+          doc.text(170, contador, "" + element.sub_total);
+        }
+
+        contador = contador + 10;
+      });
+      if (this.auxtipoventa == "cta cte") {
+        contador = contador + 20;
+        doc.setDrawColor(255, 0, 0);
+        doc.setLineWidth(0.4);
+        doc.line(10, contador - 10, 200, contador - 10);
+        doc.text(90, contador - 7, " Articulos Pagados");
+        this.productoscta.forEach((element) => {
+          console.log(element);
+          //    doc.setFontSize(9);
+          doc.text(10, contador, "  " + element.cantidad);
+          doc.setLineWidth(0.6);
+          doc.text(30, contador, " " + element.nombre);
+          doc.setLineWidth(0.6);
+
+          doc.text(100, contador, "" + element.precio);
+          doc.setLineWidth(0.6);
+          doc.text(170, contador, "" + element.sub_total);
+
+          contador = contador + 10;
+        });
+      }
+      contador = contador + 10;
+
+      doc.setFontSize(14);
+      if (this.presupuesto != true) {
+        if (this.auxtipoventa == "cta cte") {
+          doc.text(10, contador, "Total $  " + Math.round(this.montocta));
+          contador = contador + 10;
+        } else {
+          doc.text(10, contador, "Total $  " + Math.round(this.monto));
+          contador = contador + 10;
+        }
+
+        doc.text(10, contador, "Entrego $  " + this.efectivo);
+        contador = contador + 10;
+        doc.text(10, contador, "Su vuelto $  " + Math.round(this.fin));
+      } else {
+        doc.text(
+          10,
+          contador,
+          "Los precios estan sujetos a cambio sin previo aviso"
+        );
+      }
+
+      doc.save(pdfName + ".pdf");
+    },
+    eliminaitem(articulo) {
+      const index = this.arrayarticulos.indexOf(articulo);
+
+      confirm("Esta seguro de eliminar este item?") &&
+        this.arrayarticulos.splice(index, 1);
+    },
+    agregaitems(pk, idarticulo, cant) {
+      this.articulos.forEach((el) => {
+        if (el.id == idarticulo) {
+          this.arrayarticulos.push({
+            fkventa: pk,
+            pkarticulo: idarticulo,
+            cantidad: cant,
+            nombre: el.nombre,
+          });
+        }
+      });
+    },
+    descuentaacopio(fk) {
+      // alert(this.montodeuda + "" + fk);
+      this.arrayarticulos.forEach((element) => {
+        // console.log(element )
+        console.log(fk);
+        var formdata = new FormData();
+
+        var requestOptions = {
+          method: "PUT",
+          body: formdata,
+          redirect: "follow",
+        };
+
+        fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/detalleacopio.php?id=" +
+            element.fkventa +
+            "&cantidad=" +
+            element.cantidad +
+            "&nombre=" +
+            element.nombre +
+            "&fecha=" +
+            new Date().toISOString().substr(0, 10) +
+            "",
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => console.log(result))
+          .then((result) => console.log("Se actualizo con exito!!"))
+          .catch((error) => console.log("error", error));
+      });
+      this.restastock();
+      alert("Se actualizo con exito!!");
+    },
+    restastock() {
+      this.arrayarticulos.forEach((element) => {
+        var formdata = new FormData();
+
+        formdata.append("id", element.pkarticulo);
+        formdata.append("resta", element.cantidad);
+
+        var requestOptions = {
+          method: "POST",
+          body: formdata,
+          redirect: "follow",
+        };
+
+        fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/actualizastock.php",
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => console.log(result));
       });
     },
     cargamixtos() {
@@ -257,7 +507,6 @@ export default {
     },
 
     actualizaestado(pk) {
-    
       var formdata = new FormData();
 
       var requestOptions = {
@@ -306,7 +555,7 @@ export default {
     },
     amplia(arts) {
       this.datosm = [];
-      console.log(arts.id);
+      //   console.log(arts.id);
       this.datosmixtos.forEach((element) => {
         if (parseInt(arts.id) == parseInt(element.fkventa)) {
           this.datosm.push(element);
@@ -332,7 +581,7 @@ export default {
       this.CtaDNI = 0;
       this.MercadoPago = 0;
       this.Transferencia = 0;
-      this.numeroremito=0;
+      this.numeroremito = 0;
     },
     //  "Efectivo",
     //   "Targeta",
@@ -389,7 +638,7 @@ export default {
             this.totalventa += parseInt(element.monto);
           }
         });
-      }  else if (this.time1 != null && this.value != null) {
+      } else if (this.time1 != null && this.value != null) {
         this.ventas.forEach((element) => {
           if (
             this.time1 == element.fecha &&
@@ -400,7 +649,7 @@ export default {
             this.totalventa += parseInt(element.monto);
           }
         });
-      }else if (this.time1 != null) {
+      } else if (this.time1 != null) {
         this.ventas.forEach((element) => {
           if (this.time1 == element.fecha && element.tipopago != "Debe") {
             this.aux.push(element);
@@ -459,7 +708,7 @@ export default {
         .then((result) => (this.ventas = result))
         .catch((error) => console.log("error", error));
     },
-      cargadetalleacopio() {
+    cargadetalleacopio() {
       var requestOptions = {
         method: "GET",
 
@@ -474,6 +723,18 @@ export default {
         //.then((result) => (console.log(result)))
         .then((result) => (this.dtacopio = result))
         .catch((error) => console.log("error", error));
+    },
+    filtradetalle(idventa) {
+      this.dataacopio = [];
+      //   alert(idventa)
+      var aux = new Array();
+      this.dtacopio.forEach((element) => {
+        if (element.fkventa == idventa) {
+          // console.log(element.fkventa+'   '+idventa)
+          aux.push(element);
+        }
+      });
+      this.dataacopio = aux;
     },
   },
 };

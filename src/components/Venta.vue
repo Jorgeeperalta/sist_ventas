@@ -802,7 +802,11 @@ export default {
       // }
       // this.restastock();
     },
+    
     restastock() {
+      if( this.auxtipoventa!= "Acopio"){
+
+    
       this.productos.forEach((element) => {
         var formdata = new FormData();
 
@@ -822,6 +826,39 @@ export default {
           .then((response) => response.text())
           .then((result) => console.log(result));
       });
+
+        }else if(this.auxtipoventa=='Acopio'){
+         
+              this.productos.forEach((element=>{
+
+     
+      var formdata = new FormData();
+
+      formdata.append("id", "");
+
+      formdata.append("detalle", element.nombre);
+      formdata.append("fkventa", this.salidapost.idventa);
+      formdata.append("fecha", new Date().toISOString().substr(0, 10));
+      formdata.append("cantidad", element.cantidad);
+      async function asyncData() {
+        const response = await fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/detalleacopio.php",
+          { method: "POST", body: formdata }
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        console.log(data);
+       
+      });
+       }))
+        }
+
       this.recargaarticulos();
     },
     focusInput() {
