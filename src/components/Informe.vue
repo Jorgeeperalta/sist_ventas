@@ -263,7 +263,7 @@ export default {
       strarts: [],
     };
   },
-
+//ALTER TABLE users MODIFY COLUMN ID_coins DECIMAL(4, 2);
   created() {
     this.cargaclientes();
     this.cargaventas();
