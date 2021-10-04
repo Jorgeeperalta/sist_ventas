@@ -1033,7 +1033,7 @@ export default {
       this.efectivo = 0;
       this.identificador = "";
       this.customer = [];
-      this.tipopago = "";
+      this.tipopago = 'Efectivo';
       this.strarticulos = "";
       this.value = "";
       this.recargaarticulos();

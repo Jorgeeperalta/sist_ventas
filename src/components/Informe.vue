@@ -72,8 +72,8 @@
           <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
         </template>
       </v-data-table>
-      <v-dialog v-model="dialog" width="500px">
-        <v-card height="720px">
+      <v-dialog v-model="dialog" width="550px">
+        <v-card >
           <br />
           <div>
             <div style="margin-left: 350px">
@@ -175,29 +175,47 @@
                   </v-list-item>
                 </v-list>
               </v-row>
+              <v-spacer></v-spacer>
+              <v-row>
+                <v-col md="4">
+                  <v-btn
+                    style="margin-left: 10px"
+                    outlined
+                    color="green"
+                    @click="descuentaacopio(detalle.id)"
+                    >Guardar</v-btn
+                  >
+                </v-col>
+                <v-col md="4">
+                  <v-btn
+                    outlined
+                    color="blue"
+                    style="margin-left: 20px"
+                    @click="llamaprint()"
+                    >Imprimir</v-btn
+                  ></v-col
+                >
 
-              <v-btn
-                style="margin-left: 10px"
-                outlined
-                color="green"
-                @click="descuentaacopio(detalle.id)"
-                >Guardar</v-btn
-              >
-              <v-btn
-                style="margin-left: 200px"
-                outlined
-                color="red"
-                @click="actualizaestado(detalle.id)"
-                >Retirado</v-btn
-              >
+                <v-col md="4">
+                  <v-btn
+                    style="margin-left: 10px"
+                    outlined
+                    color="red"
+                    @click="actualizaestado(detalle.id)"
+                    >Retirado</v-btn
+                  ></v-col
+                >
+              </v-row>
             </div>
           </div>
         </v-card>
       </v-dialog>
       <v-dialog v-model="dialogacopio" width="500px">
         <v-card height="600px">
-          <h3 style="margin-left: 30px">Apto para retiro 'A fovor del Cliente'</h3>
-          <br>
+          <h3 style="margin-left: 30px">
+            Apto para retiro 'A fovor del Cliente'
+          </h3>
+          <br />
           <div style="margin-left: 50px">
             <v-label v-for="art in dataacopio" :key="art">
               <div v-if="art.cantidad > 0">
@@ -213,7 +231,8 @@
 <script>
 import DatePicker from "vue2-datepicker";
 import "vue2-datepicker/index.css";
-import imagen from "@/imagen"
+import imagen from "@/imagen";
+import jsPDF from "jspdf";
 export default {
   components: { DatePicker },
   data() {
@@ -263,7 +282,7 @@ export default {
       strarts: [],
     };
   },
-//ALTER TABLE users MODIFY COLUMN ID_coins DECIMAL(4, 2);
+  //ALTER TABLE users MODIFY COLUMN ID_coins DECIMAL(4, 2);
   created() {
     this.cargaclientes();
     this.cargaventas();
@@ -280,9 +299,42 @@ export default {
       .finally(() => (this.isLoading = false));
   },
   methods: {
-      print() {
-    //  console.log(this.salidapost);
-      //this.numerodeventa=this.salidapost.idventa;
+    llamaprint(){
+      this.dtacopio=[]
+        async function asyncData() {
+        const response = await fetch(
+            "http://jorgeperalta-001-site6.itempurl.com/detalleacopio.php"
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        this.dtacopio  = data;
+
+         this.filtradetalle(this.arrayarticulos[0].fkventa);
+         this.print()
+      });
+
+    },
+    print() {
+        
+      var idventa = this.arrayarticulos[0].fkventa;
+    
+     
+      var auxdomicilio = "";
+      var auxlocalidad = "";
+      this.clientes.forEach((el) => {
+        if (el.apellido == this.detalle.apellido) {
+          auxdomicilio = el.domicilio;
+          auxlocalidad = el.localidad;
+        }
+      });
+      //  console.log(this.salidapost);
+
       var horaA = new Date().toISOString().substr(0, 10);
       var arrayFeha = horaA.split(["-"]);
       let pdfName = "Factura ";
@@ -290,7 +342,7 @@ export default {
       var doc = new jsPDF();
       doc.setLineWidth(1.5);
       doc.line(8, 5, 200, 5);
-      var image =imagen;
+      var image = imagen;
       doc.addImage(image, "PNG", 85, 6, 40, 40);
       doc.line(10, 35, 200, 35);
       doc.setFontSize(14);
@@ -303,115 +355,73 @@ export default {
         doc.setFontSize(14);
         doc.text(10, 12, "Presupuesto");
       } else {
-        doc.text(10, 12, "Remito:  " + this.salidapost.idventa);
+        doc.text(10, 12, "Remito:  " + idventa);
       }
       doc.setFontSize(8);
       doc.text(150, 30, "Uso interno");
       doc.setFontSize(13);
       doc.text(10, 47, "Condicion de IVA : Consumidor Final  ");
       doc.setFontSize(13);
-      if (this.presupuesto != true) {
-        doc.text(130, 47, "Tipo de Pago:  " + this.opcion);
-      }
+      // if (this.presupuesto != true) {
+      //   doc.text(130, 47, "Tipo de Pago:  " + this.opcion);
+      // }
       doc.setFontSize(13);
-      doc.text(10, 57, "Apellido y Nombre:  " + this.customer.apellido);
+      doc.text(10, 57, "Apellido y Nombre:  " + this.detalle.apellido);
       doc.setFontSize(13);
-      doc.text(130, 57, "Domicilio:  " + this.customer.domicilio);
+      doc.text(130, 57, "Domicilio:  " + auxdomicilio);
       doc.setFontSize(13);
-      doc.text(10, 67, "Localidad:  " + this.customer.localidad);
+      doc.text(10, 67, "Localidad:  " + auxlocalidad);
       doc.setFontSize(13);
-      if (this.presupuesto == true) {
-        doc.text(130, 67, "Presupuesto");
-      } else {
-        doc.text(130, 67, "Retira: " + this.auxtipoventa);
-      }
 
-      if (this.auxtipoventa == "Acopio") {
-        doc.setFontSize(13);
-        doc.setTextColor("red");
-        doc.text(165, 67, " " + this.auxfecharetiro);
-      }
       doc.setTextColor(0, 0, 0);
       doc.setLineWidth(0.8);
       doc.line(10, 75, 200, 75);
+      doc.text(130, 67, "Retira Ahora ");
       doc.setLineWidth(0.6);
       doc.line(10, 78, 200, 78);
       doc.setFontSize(9);
       doc.text(10, 85, "Cantidad ");
       doc.setLineWidth(0.6);
       doc.text(30, 85, "Articulo ");
-      doc.setLineWidth(0.6);
-      doc.text(100, 85, "Precio U.");
-      doc.setLineWidth(0.6);
-      doc.text(170, 85, "Sub Total ");
 
       doc.setLineWidth(0.6);
       doc.line(10, 88, 200, 88);
 
       var contador = 95;
 
-      this.productos.forEach((element) => {
-        console.log(element);
+      this.arrayarticulos.forEach((element) => {
+        //   console.log(element);
         //    doc.setFontSize(9);
         doc.text(10, contador, "  " + element.cantidad);
         doc.setLineWidth(0.6);
         doc.text(30, contador, " " + element.nombre);
         doc.setLineWidth(0.6);
-        if (this.auxtipoventa == "cta cte") {
-          doc.text(100, contador, "");
-          doc.setLineWidth(0.6);
-          doc.text(170, contador, "");
-        } else {
-          doc.text(100, contador, "" + element.precio);
-          doc.setLineWidth(0.6);
-          doc.text(170, contador, "" + element.sub_total);
-        }
 
         contador = contador + 10;
       });
-      if (this.auxtipoventa == "cta cte") {
-        contador = contador + 20;
-        doc.setDrawColor(255, 0, 0);
-        doc.setLineWidth(0.4);
-        doc.line(10, contador - 10, 200, contador - 10);
-        doc.text(90, contador - 7, " Articulos Pagados");
-        this.productoscta.forEach((element) => {
-          console.log(element);
-          //    doc.setFontSize(9);
-          doc.text(10, contador, "  " + element.cantidad);
-          doc.setLineWidth(0.6);
-          doc.text(30, contador, " " + element.nombre);
-          doc.setLineWidth(0.6);
 
-          doc.text(100, contador, "" + element.precio);
-          doc.setLineWidth(0.6);
-          doc.text(170, contador, "" + element.sub_total);
+      contador = contador + 20;
+      doc.setDrawColor(255, 0, 0);
+      doc.setLineWidth(0.4);
+      doc.line(10, contador - 10, 200, contador - 10);
+      doc.text(90, contador - 7, " Articulos a Favor");
+      this.dataacopio.forEach((element) => {
+        if(element.cantidad!=0){
 
-          contador = contador + 10;
-        });
-      }
+      
+        console.log(element);
+        //    doc.setFontSize(9);
+        doc.text(10, contador, "  " + element.cantidad);
+        doc.setLineWidth(0.6);
+        doc.text(30, contador, " " + element.detalle);
+        doc.setLineWidth(0.6);
+  }
+        contador = contador + 10;
+      });
+
       contador = contador + 10;
 
       doc.setFontSize(14);
-      if (this.presupuesto != true) {
-        if (this.auxtipoventa == "cta cte") {
-          doc.text(10, contador, "Total $  " + Math.round(this.montocta));
-          contador = contador + 10;
-        } else {
-          doc.text(10, contador, "Total $  " + Math.round(this.monto));
-          contador = contador + 10;
-        }
-
-        doc.text(10, contador, "Entrego $  " + this.efectivo);
-        contador = contador + 10;
-        doc.text(10, contador, "Su vuelto $  " + Math.round(this.fin));
-      } else {
-        doc.text(
-          10,
-          contador,
-          "Los precios estan sujetos a cambio sin previo aviso"
-        );
-      }
 
       doc.save(pdfName + ".pdf");
     },
@@ -554,6 +564,9 @@ export default {
       }
     },
     amplia(arts) {
+      this.cantidad=''
+      this.detalleacopio=''
+     this.arrayarticulos = [];
       this.datosm = [];
       //   console.log(arts.id);
       this.datosmixtos.forEach((element) => {
@@ -563,6 +576,7 @@ export default {
       });
 
       this.detalle = arts;
+      console.log(arts);
       var aux = this.detalle.strarticulos;
       this.strarts = aux.split(["-"]);
 
@@ -724,17 +738,19 @@ export default {
         .then((result) => (this.dtacopio = result))
         .catch((error) => console.log("error", error));
     },
-    filtradetalle(idventa) {
+    filtradetalle(idvent) {
+     
       this.dataacopio = [];
       //   alert(idventa)
       var aux = new Array();
       this.dtacopio.forEach((element) => {
-        if (element.fkventa == idventa) {
+        if (element.fkventa == idvent) {
           // console.log(element.fkventa+'   '+idventa)
           aux.push(element);
         }
       });
       this.dataacopio = aux;
+    
     },
   },
 };
