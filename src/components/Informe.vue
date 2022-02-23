@@ -225,12 +225,26 @@
       </v-dialog>
       <v-dialog v-model="dialogacopio" width="500px">
         <v-card height="600px">
+            <v-label style="margin-left: 50px">Cliente: {{ detalle.apellido }} <br /> </v-label>
+            <br />
           <h3 style="margin-left: 30px">
             Apto para retiro 'A fovor del Cliente'
           </h3>
           <br />
           <div style="margin-left: 50px">
             <v-label v-for="art in dataacopio" :key="art">
+              <div v-if="art.cantidad > 0">
+                {{ art.cantidad }}___ {{ art.detalle }}___ {{ art.fecha }}<br />
+              </div>
+            </v-label>
+          </div>
+          <br />
+           <h3 style="margin-left: 30px">
+            Articulos 'Retirado/s'
+          </h3>
+          <br />
+          <div style="margin-left: 50px">
+            <v-label v-for="art in datasaacopio" :key="art">
               <div v-if="art.cantidad > 0">
                 {{ art.cantidad }}___ {{ art.detalle }}___ {{ art.fecha }}<br />
               </div>
@@ -250,6 +264,8 @@ export default {
   components: { DatePicker },
   data() {
     return {
+      datasaacopio: null,
+      saacopio:null,
       idpagoacobrar:0,
       idventamixto:0,
       banpago:false,
@@ -302,6 +318,7 @@ export default {
   },
   //ALTER TABLE users MODIFY COLUMN ID_coins DECIMAL(4, 2);
   created() {
+    this.cargasalidaacopio();
     this.cargaclientes();
     this.cargaventas();
     this.cargamixtos();
@@ -554,6 +571,7 @@ export default {
     descuentaacopio(fk) {
       // alert(this.montodeuda + "" + fk);
       this.arrayarticulos.forEach((element) => {
+        
         // console.log(element )
         console.log(fk);
         var formdata = new FormData();
@@ -582,8 +600,41 @@ export default {
           .catch((error) => console.log("error", error));
       });
       this.restastock();
+      this. salidaacopio()
       alert("Se actualizo con exito!!");
     },
+    salidaacopio(){
+      this.arrayarticulos.forEach((element) => {
+           
+        
+      var formdata = new FormData();
+
+      formdata.append("id", "");
+
+      formdata.append("detalle", element.nombre);
+      formdata.append("fkventa", element.fkventa);
+      formdata.append("fecha", new Date().toISOString().substr(0, 10));
+      formdata.append("cantidad", element.cantidad);
+      async function asyncData() {
+        const response = await fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/salidaacopio.php",
+          { method: "POST", body: formdata }
+        );
+        const data = await response.json();
+
+        return data;
+      }
+
+      const result = asyncData();
+
+      result.then((data) => {
+        console.log(data);
+       
+      });
+       })
+
+     
+      },
     restastock() {
       this.arrayarticulos.forEach((element) => {
         var formdata = new FormData();
@@ -874,8 +925,24 @@ export default {
         .then((result) => (this.dtacopio = result))
         .catch((error) => console.log("error", error));
     },
+      cargasalidaacopio() {
+      var requestOptions = {
+        method: "GET",
+
+        redirect: "follow",
+      };
+      //
+      fetch(
+        "http://jorgeperalta-001-site6.itempurl.com/salidaacopio.php",
+        requestOptions
+      )
+        .then((response) => response.json())
+       // .then((result) => (console.log(result)))
+        .then((result) => (this.saacopio = result))
+        .catch((error) => console.log("error", error));
+    },
     filtradetalle(idvent) {
-     
+      this.datasaacopio = []
       this.dataacopio = [];
       //   alert(idventa)
       var aux = new Array();
@@ -886,6 +953,15 @@ export default {
         }
       });
       this.dataacopio = aux;
+
+        var aux1 = new Array();
+      this.saacopio.forEach((element) => {
+        if (element.fkventa == idvent) {
+          // console.log(element.fkventa+'   '+idventa)
+          aux1.push(element);
+        }
+      });
+      this.datasaacopio = aux1;
     
     },
   },
