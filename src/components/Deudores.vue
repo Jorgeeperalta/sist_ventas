@@ -37,10 +37,10 @@
           ></date-picker
         ></v-col>
 
-        <v-col md="3" style="margin-top: 30px">
+        <v-col md="2" style="margin-top: 30px">
           <v-btn color="green" @click="filtar()" outlined>Buscar</v-btn>
           <v-btn
-            style="margin-left: 30px"
+         style="margin-left: 0px;margin-top: 10px"
             color="red"
             @click="limpiar()"
             outlined
@@ -120,7 +120,7 @@
             </div>
             <br />
             <div style="margin-left: 50px">
-              <v-label>Monto a abonar: $ <br /></v-label>
+              <v-label>Monto a cobrar: $ <br /></v-label>
               <v-col md="8"
                 ><v-text-field
                   style="margin-left: -15px"
@@ -129,14 +129,13 @@
                   outlined
                 ></v-text-field>
               </v-col>
-              <!-- <v-col md="8"
-                ><v-text-field
-                  style="margin-left: -15px"
-                  v-model="detalledeuda"
-                  label="Detalle"
-                  outlined
-                ></v-text-field>
-              </v-col> -->
+              <v-col md="8"
+                ><v-select
+                      label="Tipo de pago"
+                      :items="tiposdepago"
+                      v-model="tipopago"
+                    ></v-select>
+              </v-col>
               <v-btn color="green" outlined @click="actualizardeuda(detalle.id)"
                 >Guradar</v-btn
               >
@@ -198,6 +197,14 @@ export default {
   components: { DatePicker },
   data() {
     return {
+      tiposdepago: [
+      "Efectivo",
+      "Targeta",
+      "Cheque",
+      "Cta. DNI",
+      "Mercado Pago",
+      "Transferencia",
+    ],
       porcentaje:0,
       nombredeudor:'',
       dialogactualizamonto:false,
@@ -209,16 +216,18 @@ export default {
       datosm: [],
       datosdeudores: [],
       detalle: [],
-      tipopago: null,
+       tipopago: "Efectivo",
       dialog: false,
       time1: null,
       aux: [],
+      auxclienteid:4,
       clientes: [],
       detalleacopio: "",
       value: null,
       ventas: [],
       totalventa: 0,
-      tiposdepago: ["Simple", "Mixto"],
+      salidapost: "",
+     // tiposdepago: ["Simple", "Mixto"],
       headers: [
         { text: "ID", value: "id" },
         {
@@ -252,7 +261,6 @@ export default {
         // alert(this.montodeuda + "" + fk);
         var porc= (this.porcentaje / 100) + 1
         var identificador= this.datosdeudor.id
-
       async function asyncData() {
          const response = await fetch(
           "http://jorgeperalta-001-site6.itempurl.com/porcentajedeuda.php?id=" +
@@ -262,23 +270,16 @@ export default {
           { method: "PUT" }
         );
         const data = await response.json();
-
         return data;
       }
-
       const result = asyncData();
-
       result.then((data) => {
         console.log(data);
         alert('Se actualizo con exito!!')
-
         this.dialogactualizamonto=false;
       
       });
     
-
-
-
     },
     actualizamontotal(deudor){
          this.dialogactualizamonto=true
@@ -291,66 +292,51 @@ export default {
           "http://jorgeperalta-001-site6.itempurl.com/actualizardeuda.php"
         );
         const data = await response.json();
-
         return data;
       }
-
       const result = asyncData();
-
       result.then((data) => {
         this.datosdeudores = data;
-
         console.log(this.datosdeudores);
       });
     },
     actualizaestadoacopio(fk) {
       // alert(this.montodeuda + "" + fk);
       var formdata = new FormData();
-
       formdata.append("id", "");
-
       formdata.append("detalle", this.detalleacopio);
       formdata.append("fkventa", fk);
       formdata.append("fecha", new Date().toISOString().substr(0, 10));
-
       async function asyncData() {
         const response = await fetch(
           "http://jorgeperalta-001-site6.itempurl.com/detalleacopio.php",
           { method: "POST", body: formdata }
         );
         const data = await response.json();
-
         return data;
       }
-
       const result = asyncData();
-
       result.then((data) => {
         console.log(data);
       });
     },
     actualizardeuda(fk) {
-      // alert(this.montodeuda + "" + fk);
+     
       var formdata = new FormData();
-
       formdata.append("id", "");
       formdata.append("pago", this.montodeuda);
       formdata.append("detalle", this.detalledeuda);
       formdata.append("fkventa", fk);
       formdata.append("fecha", new Date().toISOString().substr(0, 10));
-
       async function asyncData() {
         const response = await fetch(
           "http://jorgeperalta-001-site6.itempurl.com/actualizardeuda.php",
           { method: "POST", body: formdata }
         );
         const data = await response.json();
-
         return data;
       }
-
       const result = asyncData();
-
       result.then((data) => {
         console.log(data);
         this.actualizarventa(fk, this.montodeuda);
@@ -367,20 +353,91 @@ export default {
           { method: "PUT" }
         );
         const data = await response.json();
-
         return data;
       }
-
       const result = asyncData();
-
       result.then((data) => {
         console.log(data);
-        alert("Almacenado con exito!!");
+        
         this.cargaventas();
         this.dialog = false;
       });
       this.traedeudores();
       this.cargaventas();
+      this. almacenaventa(montod)
+      ////////////////////////////////////////////////////////////////////////////
+        
+    },
+    almacenaventa(monto){
+        
+     
+ 
+       var formdata = new FormData();
+         
+        formdata.append("id", "");
+        formdata.append("fkcliente", 40);
+        formdata.append("fecha", new Date().toISOString().substr(0, 10));
+        formdata.append("monto", monto);
+        formdata.append("tipopago","Simple");
+        formdata.append("strarticulos", "*****");
+        formdata.append("tipoventa", "Retirado");
+           formdata.append("fecharetiro", new Date().toISOString().substr(0, 10) );
+        formdata.append("fechasalida",  new Date().toISOString().substr(0, 10));
+       
+
+        async function asyncData() {
+
+          const response = await fetch(
+            "http://jorgeperalta-001-site6.itempurl.com/ventas.php",
+            { method: "POST",
+             body:formdata
+           }
+          );
+          const data = await response.json();
+
+          return data;
+        }
+
+        const result1 = asyncData();
+
+        result1.then((data) => {
+            console.log(data);
+          this.salidapost = data;
+
+         // console.log(this.salidapost);
+          this.guardaopcion();
+        //  this.snackbar2=true
+           // this.restastock();
+        })
+    },
+    guardaopcion() {
+     
+      
+        var formdata = new FormData();
+
+        formdata.append("id", "");
+        formdata.append("tipo",this.tipopago);
+        formdata.append("pesos", this.montodeuda);
+        formdata.append("fkventa", this.salidapost.idventa);
+
+        var requestOptions = {
+          method: "POST",
+          body: formdata,
+          redirect: "follow",
+        };
+
+        fetch(
+          "http://jorgeperalta-001-site6.itempurl.com/mixto.php",
+          requestOptions
+        )
+          .then((response) => response.json())
+          // .then((result) => console.log(result))
+          .then(
+            (result) => console.log(result)
+            //  confirm("La venta se almaceno con exito!!")
+          )
+          .catch((error) => console.log("error", error));
+      
     },
     cierra() {
       this.dialog = false;
@@ -394,29 +451,22 @@ export default {
           "http://jorgeperalta-001-site6.itempurl.com/mixto.php"
         );
         const data = await response.json();
-
         return data;
       }
-
       const result = asyncData();
-
       result.then((data) => {
         this.datosmixtos = data;
-
         console.log(this.datosmixtos);
       });
     },
-
     actualizaestado(pk) {
       alert(pk);
       var formdata = new FormData();
-
       var requestOptions = {
         method: "PUT",
         body: formdata,
         redirect: "follow",
       };
-
       fetch(
         "http://jorgeperalta-001-site6.itempurl.com/ventas.php?id=" +
           pk +
@@ -435,24 +485,20 @@ export default {
     deleteItem(item) {
       //   console.log(item);
       const index = this.tableventas.indexOf(item);
-
       var option = confirm("Desea eliminar esta venta! \n  OK or Cancelar.");
       if (option) {
         var formdata = new FormData();
-
         var requestOptions = {
           method: "DELETE",
           body: formdata,
           redirect: "follow",
         };
-
         fetch(
           "http://jorgeperalta-001-site6.itempurl.com/ventas.php?id=" + item.id,
           requestOptions
         )
           .then((response) => response.text())
           .then((result) => console.log(result), this.cargaventas())
-
           .catch((error) => console.log("error", error));
       }
     },
@@ -462,19 +508,16 @@ export default {
           this.datodeuda.push(element);
         }
       });
-
       this.datosm = [];
-      console.log(arts.id);
+      this.auxclienteid= arts.id;
       this.datosmixtos.forEach((element) => {
         if (parseInt(arts.id) == parseInt(element.fkventa)) {
           this.datosm.push(element);
         }
       });
-
       this.detalle = arts;
       var aux = this.detalle.strarticulos;
       this.strarts = aux.split(["-"]);
-
       this.dialog = true;
     },
     limpiar() {
@@ -543,7 +586,6 @@ export default {
     cargaclientes() {
       var requestOptions = {
         method: "GET",
-
         redirect: "follow",
       };
       //
@@ -555,11 +597,9 @@ export default {
         .then((result) => (this.clientes = result))
         .catch((error) => console.log("error", error));
     },
-
     cargaventas() {
       var requestOptions = {
         method: "GET",
-
         redirect: "follow",
       };
       //

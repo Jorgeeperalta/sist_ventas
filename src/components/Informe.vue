@@ -117,11 +117,24 @@
               </v-label>
             </div>
             <br />
+             <div style="margin-left: 37px" v-if="banpago">
+               <v-col md="6">
+                 <v-text-field v-model="pesos" label="Ingrese monto"></v-text-field>
+                   <v-btn color="green" @click="guardapesos()">Guardar pago</v-btn>
+                
+                 </v-col>
+               
+             </div>
+
+            <br />
             <div style="margin-left: 50px">
               <v-label
                 >Total: $ <b> {{ detalle.monto }} </b> <br />
               </v-label>
             </div>
+               <div style="margin-left: 400px">
+                     <v-btn   color="red" @click="cerrar(),dialog=false">X</v-btn>
+                     </div>
             <br />
             <div style="margin-left: 50px" v-if="detalle.tipoventa == 'Acopio'">
               <v-icon
@@ -237,6 +250,9 @@ export default {
   components: { DatePicker },
   data() {
     return {
+      idpagoacobrar:0,
+      idventamixto:0,
+      banpago:false,
       dataacopio: [],
       cantidad: 0,
       dialogacopio: false,
@@ -245,6 +261,7 @@ export default {
       Targeta: 0,
       Cheque: 0,
       CtaDNI: 0,
+      pesos: 0,
       MercadoPago: 0,
       Transferencia: 0,
       datosmixtos: [],
@@ -275,6 +292,7 @@ export default {
         { text: "Estado", value: "tipoventa" },
         { text: "Acciones", value: "actions", sortable: false },
       ],
+      idpago:0,
       articulos: [],
       arrayarticulos: [],
       ventas: [],
@@ -299,6 +317,92 @@ export default {
       .finally(() => (this.isLoading = false));
   },
   methods: {
+    guardapesos(){
+          //       alert(this.pesos +'         '+this.idpago)
+           var formdata = new FormData();
+
+          formdata.append("id", "");
+          formdata.append("tipo", 'Efectivo');
+          formdata.append("pesos", this.pesos);
+          formdata.append("fkventa",  this.idventamixto);
+
+          var requestOptions = {
+            method: "POST",
+            body: formdata,
+            redirect: "follow",
+          };
+
+          fetch(
+            "http://jorgeperalta-001-site6.itempurl.com/mixto.php",
+            requestOptions
+          )
+            .then((response) => response.json())
+            // .then((result) => console.log(result))
+            .then(
+              (result) => console.log(result)
+              //  confirm("La venta se almaceno con exito!!")
+            )
+            .catch((error) => console.log("error", error));
+
+        // var formdata = new FormData();
+        // var requestOptions = {
+        //   method: "PUT",
+        //   body: formdata,
+        //   redirect: "follow",
+        // };
+        
+
+        // fetch(
+            
+        //   "http://jorgeperalta-001-site6.itempurl.com/mixto.php?id=" +
+        //     this.idpago +
+        //     "&tipo=" +
+        //     "Efectivo" +
+        //     "&pesos=" +
+        //     this.pesos +
+        //     "&fkventa=" +
+        //     this.idventamixto +
+        //     "",
+        //   requestOptions
+        // )
+        //   .then((response) => response.text())
+        //   .then((result) => console.log(result),alert("Se actualizo con exito!!"))
+        //   .catch((error) => console.log("error", error));
+
+
+            this. guardanada()
+    },
+     guardanada(){
+             
+
+                var formdata = new FormData();
+
+        var requestOptions = {
+          method: "PUT",
+          body: formdata,
+          redirect: "follow",
+        };
+        
+
+        fetch(
+            
+          "http://jorgeperalta-001-site6.itempurl.com/mixto.php?id=" +
+            this.idpagoacobrar +
+            "&tipo=" +
+            "Efectivo" +
+            "&pesos=" +
+            0 +
+            "&fkventa=" +
+            '' +
+            "",
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => console.log(result))
+          .catch((error) => console.log("error", error));
+          this.dialog=false;
+    },
+    
     llamaprint(){
       this.dtacopio=[]
         async function asyncData() {
@@ -343,7 +447,7 @@ export default {
       doc.setLineWidth(1.5);
       doc.line(8, 5, 200, 5);
       var image = imagen;
-      doc.addImage(image, "PNG", 85, 6, 40, 40);
+      doc.addImage(image, "PNG", 85, 6, 40, 29);
       doc.line(10, 35, 200, 35);
       doc.setFontSize(14);
       doc.text(
@@ -354,8 +458,12 @@ export default {
       if (this.presupuesto == true) {
         doc.setFontSize(14);
         doc.text(10, 12, "Presupuesto");
+          doc.text(10, 18, "Calle 17 esq. 37 Santa Teresita");
+        doc.text(10, 24, "Tel/Whatsapp: 2246448173");
       } else {
         doc.text(10, 12, "Remito:  " + idventa);
+          doc.text(10, 18, "Calle 17 esq. 37 Santa Teresita");
+        doc.text(10, 24, "Tel/Whatsapp: 2246448173");
       }
       doc.setFontSize(8);
       doc.text(150, 30, "Uso interno");
@@ -564,6 +672,7 @@ export default {
       }
     },
     amplia(arts) {
+      this.idventamixto= arts.id;
       this.cantidad=''
       this.detalleacopio=''
      this.arrayarticulos = [];
@@ -572,6 +681,14 @@ export default {
       this.datosmixtos.forEach((element) => {
         if (parseInt(arts.id) == parseInt(element.fkventa)) {
           this.datosm.push(element);
+          if(element.tipo=='Efectivo')
+          this.idpago=element.id;
+          if(element.tipo=='A cobrar'){
+            this.banpago=true;
+            this.idpagoacobrar=element.id;
+          }else{
+            // this.banpago=false;
+          }
         }
       });
 
@@ -581,6 +698,9 @@ export default {
       this.strarts = aux.split(["-"]);
 
       this.dialog = true;
+    },
+    cerrar (){
+           this.banpago=false;
     },
     limpiar() {
       this.tableventas = [];
@@ -611,16 +731,22 @@ export default {
           if (elementmixtos.fkventa == elementaux.id) {
             if (elementmixtos.tipo == "Efectivo") {
               this.Efectivo += parseInt(elementmixtos.pesos);
+             this.totalventa += parseInt(elementmixtos.pesos);
             } else if (elementmixtos.tipo == "Targeta") {
               this.Targeta += parseInt(elementmixtos.pesos);
+               this.totalventa += parseInt(elementmixtos.pesos);
             } else if (elementmixtos.tipo == "Cheque") {
               this.Cheque += parseInt(elementmixtos.pesos);
+               this.totalventa += parseInt(elementmixtos.pesos);
             } else if (elementmixtos.tipo == "Cta. DNI") {
               this.CtaDNI += parseInt(elementmixtos.pesos);
+               this.totalventa += parseInt(elementmixtos.pesos);
             } else if (elementmixtos.tipo == "Mercado Pago") {
               this.MercadoPago += parseInt(elementmixtos.pesos);
+               this.totalventa += parseInt(elementmixtos.pesos);
             } else if (elementmixtos.tipo == "Transferencia") {
               this.Transferencia += parseInt(elementmixtos.pesos);
+               this.totalventa += parseInt(elementmixtos.pesos);
             }
             // console.log(elementmixtos.fkventa + "   " + elementaux.id)
           }
@@ -637,8 +763,18 @@ export default {
             this.tipopago == element.tipopago &&
             element.tipopago != "Debe"
           ) {
+            // this.datosmixtos.forEach((elemento) => {
+            //         if(elemento.fkventa== element.id){
+            //           if(elemento.tipo=='A pagar'){
+            //             this.aux.push(element);
+            //             this.totalventa += parseInt(element.monto-elemento.pesos);
+            //           }
+            //         }else{
+                      
+            //         }
+            // })
             this.aux.push(element);
-            this.totalventa += parseInt(element.monto);
+         //   this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.time1 != null && this.tipopago != null) {
@@ -649,7 +785,7 @@ export default {
             element.tipopago != "Debe"
           ) {
             this.aux.push(element);
-            this.totalventa += parseInt(element.monto);
+          //  this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.time1 != null && this.value != null) {
@@ -660,28 +796,28 @@ export default {
             element.tipopago != "Debe"
           ) {
             this.aux.push(element);
-            this.totalventa += parseInt(element.monto);
+           // this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.time1 != null) {
         this.ventas.forEach((element) => {
           if (this.time1 == element.fecha && element.tipopago != "Debe") {
             this.aux.push(element);
-            this.totalventa += parseInt(element.monto);
+          //  this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.value != null) {
         this.ventas.forEach((element) => {
           if (this.value == element.apellido && element.tipopago != "Debe") {
             this.aux.push(element);
-            this.totalventa += parseInt(element.monto);
+           // this.totalventa += parseInt(element.monto);
           }
         });
       } else if (this.numeroremito != null) {
         this.ventas.forEach((element) => {
           if (this.numeroremito == element.id && element.tipopago != "Debe") {
             this.aux.push(element);
-            this.totalventa += parseInt(element.monto);
+           // this.totalventa += parseInt(element.monto);
           }
         });
       } else {

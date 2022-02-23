@@ -45,7 +45,17 @@
 
       <div>
         <v-row>
-          <v-col md="4">
+           <v-col md="3">
+          <v-btn
+            block
+            style="margin-top: -8px; margin-left: 2px"
+            outlined
+            color="blue"
+            @click="(dialogproducto = true),unitario=true"
+            >Suma producto</v-btn
+          >
+        </v-col>
+          <v-col md="3">
             <v-btn
               block
               style="margin-top: -8px; margin-left: 10px"
@@ -62,7 +72,7 @@
             >
           </v-col>
 
-          <v-col md="4">
+          <v-col md="3">
             <v-btn
               block
               style="margin-top: -8px; margin-left: 2px"
@@ -72,7 +82,7 @@
               >Retira Ahora</v-btn
             >
           </v-col>
-          <v-col md="">
+          <v-col md="3">
             <v-btn
               block
               style="margin-top: -8px; margin-left: -5px"
@@ -82,6 +92,7 @@
               >Acopio</v-btn
             >
           </v-col>
+         
         </v-row>
 
         <!-- <v-btn
@@ -546,6 +557,49 @@
         <!-- <v-btn @click="mu()"> muestra</v-btn> -->
       </v-container>
     </template>
+     <v-dialog
+      v-model="dialogproducto"
+      width="500"
+    >
+      
+
+      <v-card>
+        <v-card-title >
+          Sume un producto
+        </v-card-title>
+
+        <v-card-text>
+          <v-row>
+            <v-col md="12">
+                    <v-text-field label="Precio" v-model="precioproducto"></v-text-field>
+            </v-col>
+            
+             <v-col md="12">
+                    <v-text-field label="Cantidad" v-model="cantidadunitario"></v-text-field>
+            </v-col>
+             <v-col md="12">
+                   
+                     <v-text-field label="Descripcion" v-model="nombreproducto"></v-text-field>
+            </v-col>
+          </v-row>
+        
+
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="dialogproducto = false,guardar(cont++)"
+          >
+            Agregar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -557,11 +611,14 @@ import imagen from "@/imagen"
 export default {
   components: { DatePicker },
   data: () => ({
+    dialogproducto: false,
+    nombreproducto: "",
     opcion: "Simple",
     numerodeventa: 0,
     salidapost: "",
     auxtipoventa: "",
     auxfecharetiro: "",
+    cantidadunitario:1,
     time1: null,
     tiposdepago: [
       "Efectivo",
@@ -570,8 +627,10 @@ export default {
       "Cta. DNI",
       "Mercado Pago",
       "Transferencia",
+      "A cobrar",
      
     ],
+     unitario:false,
     tipopago:'Efectivo',
     totalcta: null,
     cuen: 0,
@@ -592,6 +651,7 @@ export default {
     monto: 0,
     cont: 0,
     moneda: [],
+    precioproducto:'',
     montomoneda: 0,
     identificador: null,
     isLoading: false,
@@ -662,10 +722,20 @@ export default {
 
   methods: {
     agregatipopago() {
+
       this.moneda.push({
         tipopago: this.tipopago,
         cantidad: this.montomoneda,
       });
+
+      if(this.tipopago!='A cobrar'){
+           this.efectivo+=parseInt(this.montomoneda)
+      }else{
+           this.fin=parseInt(this.montomoneda)
+      }
+      
+
+
     },
     guardaopcion() {
       
@@ -900,7 +970,7 @@ export default {
       doc.setLineWidth(1.5);
       doc.line(8, 5, 200, 5);
       var image =imagen;
-      doc.addImage(image, "PNG", 85, 6, 40, 40);
+      doc.addImage(image, "PNG", 85, 6, 40, 29);
       doc.line(10, 35, 200, 35);
       doc.setFontSize(14);
       doc.text(
@@ -911,8 +981,12 @@ export default {
       if (this.presupuesto == true) {
         doc.setFontSize(14);
         doc.text(10, 12, "Presupuesto");
+        doc.text(10, 18, "Calle 17 esq. 37 Santa Teresita");
+        doc.text(10, 24, "Tel/Whatsapp: 2246448173");
       } else {
         doc.text(10, 12, "Remito:  " + this.salidapost.idventa);
+        doc.text(10, 18, "Calle 17 esq. 37 Santa Teresita");
+        doc.text(10, 24, "Tel/Whatsapp: 2246448173");
       }
       doc.setFontSize(8);
       doc.text(150, 30, "Uso interno");
@@ -1011,9 +1085,24 @@ export default {
           contador = contador + 10;
         }
 
-        doc.text(10, contador, "Entrego $  " + this.efectivo);
+        // doc.text(10, contador, "Pago $  " + this.efectivo);
         contador = contador + 10;
-        doc.text(10, contador, "Su vuelto $  " + Math.round(this.fin));
+/////////////////////
+    //  if(this.moneda != null){
+    //         this.moneda.forEach((element) => {
+  
+    //   if(element.tipopago == "A cobrar" && this.moneda != null)
+    //     doc.text(60, contador, "A cobrar  " );
+    // }
+
+    // )
+    //  } 
+    if( this.tipopago == "A cobrar" && this.moneda != null){
+                 doc.text(90, contador, "A cobrar en obra  " );
+                 // doc.text(100, contador, "A cobrar  " + Math.round(this.fin));
+     }
+    
+
       } else {
         doc.text(
           10,
@@ -1074,6 +1163,8 @@ export default {
       //  console.log(this.montocta);
     },
     guardar(cont) {
+ if(!this.unitario){
+
       this.items.forEach((element) => {
         if (this.identificador == element.id) {
           if (element.cantidad == "0") {
@@ -1120,7 +1211,20 @@ export default {
 
       this.recargaarticulos();
       this.identificador = null;
-    },
+
+
+    }else{
+            this.productos.push({
+              pk: cont,
+              id: cont,
+              nombre: this.nombreproducto,
+              precio: this.precioproducto,
+              cantidad: this.cantidadunitario,
+              sub_total: this.precioproducto * this.cantidadunitario,
+            //  ganancia:  this.precioproducto * this.cantidadunitario* 0.3
+            });
+            this.monto +=parseInt( this.precioproducto *this.cantidadunitario)
+    }},
 
     getColor(sub_total) {
       if (sub_total > 400) return "purple darken-3";
