@@ -569,6 +569,7 @@ export default {
       });
     },
     descuentaacopio(fk) {
+      //hola
       // alert(this.montodeuda + "" + fk);
       this.arrayarticulos.forEach((element) => {
         
